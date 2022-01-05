@@ -1,5 +1,5 @@
-use scoundrel_geometry::{Axis2D, Point, Rect};
 use anyhow::{anyhow, Result};
+use scoundrel_geometry::{Axis2D, Point, Rect};
 
 #[derive(Debug, Copy, Clone)]
 pub enum PanelSize {

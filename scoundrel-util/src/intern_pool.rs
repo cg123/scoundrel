@@ -36,3 +36,9 @@ impl<T: Hash + Eq + Copy> InternPool<T> {
         self.values.get(id.0)
     }
 }
+
+impl<T: Hash + Eq + Copy> Default for InternPool<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}

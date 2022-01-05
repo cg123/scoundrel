@@ -1,6 +1,6 @@
+use paste::paste;
 use scoundrel_util::ignore_ident;
 use scoundrel_util::numeric::{HasSqrt, HasZero, Ring};
-use paste::paste;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};

@@ -1,8 +1,8 @@
+use crate::{Neighbor, Point, Rect, Vector2};
 use scoundrel_util::numeric::HasSqrt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::cmp::{max, min};
-use crate::{Neighbor, Rect, Point, Vector2};
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Clone)]

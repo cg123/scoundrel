@@ -65,3 +65,9 @@ impl<T> Menu<T> {
         self
     }
 }
+
+impl<T> Default for Menu<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
