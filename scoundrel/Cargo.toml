@@ -1,0 +1,16 @@
+[package]
+name = "scoundrel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+scoundrel-algorithm = { path = "../scoundrel-algorithm" }
+scoundrel-geometry = { path = "../scoundrel-geometry" }
+scoundrel-util = { path = "../scoundrel-util" }
+scoundrel-ui = { path = "../scoundrel-ui", optional=true }
+wgpu = "0.12.0"
+
+[features]
+serde = ["scoundrel-geometry/serde"]
+tui = ["scoundrel-geometry/tui"]
+ui = ["tui", "scoundrel-ui"]

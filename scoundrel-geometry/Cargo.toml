@@ -1,0 +1,11 @@
+[package]
+name = "scoundrel-geometry"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+scoundrel-util = { path = "../scoundrel-util" }
+tui = { version = "0.16.0", optional=true }
+serde = { version = "1.0", optional=true, features=["derive"]}
+paste = "1.0.6"
+thiserror = "1.0.30"
