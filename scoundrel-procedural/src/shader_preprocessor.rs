@@ -31,53 +31,33 @@ impl ShaderPreprocessor {
         }
     }
 
-    /*pub fn process_all(&mut self) -> Result<Vec<ShaderError>, std::io::Error> {
-        let mut errors = vec![];
-        for entry in std::fs::read_dir(&self.base_directory)? {
-            let entry = entry?;
-            let path = entry.path();
-            if !path.is_file() { continue; }
-            if let Some(extension) = path.extension() {
-                if extension != "wgsl" { continue; }
-                if let Err(e) = self.get(path, &vec![]) {
-                    errors.push(e);
-                }
-            }
-        }
-
-        Ok(errors)
-    }*/
-
     pub fn get<P: AsRef<Path>>(
         &mut self,
         rel_path: P,
-        stack: &Vec<PathBuf>,
+        stack: &[PathBuf],
     ) -> Result<&str, ShaderError> {
         let path = self.base_directory.join(rel_path);
         if stack.contains(&path) {
-            return Err(ShaderError::RecursiveDependency(path, stack.clone()));
+            return Err(ShaderError::RecursiveDependency(path, Vec::from(stack)));
         }
 
-        match self.processed.get(&path) {
-            None => {
-                let data = self.preprocess(&path, stack)?;
-                self.processed.insert(path.clone(), data);
-            }
-            _ => {}
+        if self.processed.get(&path) == None {
+            let data = self.preprocess(&path, stack)?;
+            self.processed.insert(path.clone(), data);
         };
         Ok(self.processed.get(&path).unwrap())
     }
 
-    fn preprocess(&mut self, path: &PathBuf, stack: &Vec<PathBuf>) -> Result<String, ShaderError> {
-        if stack.contains(&path) {
+    fn preprocess(&mut self, path: &PathBuf, stack: &[PathBuf]) -> Result<String, ShaderError> {
+        if stack.contains(path) {
             return Err(ShaderError::RecursiveDependency(
                 path.clone(),
-                stack.clone(),
+                Vec::from(stack),
             ));
         }
 
         let sub_stack = &{
-            let mut ss = stack.clone();
+            let mut ss = Vec::from(stack);
             ss.push(path.clone());
             ss
         };
@@ -86,13 +66,13 @@ impl ShaderPreprocessor {
         let mut result = String::with_capacity(data.len());
         let mut validate = stack.is_empty();
         for line in data.lines() {
-            if line.starts_with("//:") {
-                let parts: Vec<_> = line["//:".len()..].split(' ').collect();
-                if parts.len() > 0 && parts[0] == "no-validate" {
+            if let Some(directive) = line.strip_prefix("//:") {
+                let parts: Vec<_> = directive.split(' ').collect();
+                if !parts.is_empty() && parts[0] == "no-validate" {
                     validate = false;
                 } else if parts.len() > 1 && parts[0] == "include" {
                     let rel_path = parts[1..].join(" ");
-                    let contents = self.get(rel_path, &sub_stack)?;
+                    let contents = self.get(rel_path, sub_stack)?;
                     result.push_str(contents);
                     result.push('\n');
                 } else {

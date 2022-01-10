@@ -14,7 +14,10 @@ impl<T> Node<T> {
     fn gt_centroid(&self, query: Point) -> (bool, bool) {
         let twice_centroid = self.bounds.min + self.bounds.max;
         let twice_query = query * 2;
-        (twice_query.x > twice_centroid.x, twice_query.y > twice_centroid.y)
+        (
+            twice_query.x > twice_centroid.x,
+            twice_query.y > twice_centroid.y,
+        )
     }
     fn child_coord(&self, query: Point) -> (usize, usize) {
         let (x_gt, y_gt) = self.gt_centroid(query);

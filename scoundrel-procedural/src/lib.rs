@@ -19,7 +19,7 @@ pub fn wgsl_module(input: TokenStream) -> TokenStream {
     let lock = PREPROCESSOR.get_or_init(|| RwLock::new(ShaderPreprocessor::default()));
     let data = {
         let mut pp = lock.write().unwrap();
-        match pp.get(rel_path, &vec![]) {
+        match pp.get(rel_path, &[]) {
             Ok(data) => data.to_string(),
             Err(e) => {
                 Diagnostic::new(Level::Error, format!("{}", e)).abort();

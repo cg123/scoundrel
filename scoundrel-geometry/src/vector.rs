@@ -1,9 +1,9 @@
-use std::hash::Hash;
 use paste::paste;
 use scoundrel_util::ignore_ident;
 use scoundrel_util::numeric::{HasSqrt, HasZero, Ring};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::hash::Hash;
 use std::ops::{Index, IndexMut};
 use thiserror::Error;
 
@@ -67,8 +67,7 @@ macro_rules! vector_inplace_op {
     };
 }
 
-pub trait VectorN<T>:
-    From<Self::Tuple> + Into<Self::Tuple> + IntoIterator<Item = T> {
+pub trait VectorN<T>: From<Self::Tuple> + Into<Self::Tuple> + IntoIterator<Item = T> {
     type Tuple;
     const LENGTH: usize;
 }

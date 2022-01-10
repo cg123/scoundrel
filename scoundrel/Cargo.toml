@@ -7,8 +7,8 @@ edition = "2021"
 scoundrel-algorithm = { path = "../scoundrel-algorithm" }
 scoundrel-geometry = { path = "../scoundrel-geometry" }
 scoundrel-util = { path = "../scoundrel-util" }
-scoundrel-procedural = { path = "../scoundrel-procedural" }
-scoundrel-ui = { path = "../scoundrel-ui", optional=true }
+scoundrel-procedural = { optional = true, path = "../scoundrel-procedural" }
+scoundrel-ui = { path = "../scoundrel-ui", optional = true }
 thiserror = "1.0"
 tui = { version = "0.16", optional = true, default-features = false, features = ["crossterm"] }
 
@@ -19,4 +19,4 @@ pollster = { version = "0.2.4", optional = true }
 [features]
 serde = ["scoundrel-geometry/serde"]
 ui = ["scoundrel-ui", "scoundrel-geometry/tui", "tui"]
-gpu = [ "wgpu", "naga", "pollster" ]
+gpu = [ "wgpu", "naga", "pollster", "scoundrel-procedural" ]

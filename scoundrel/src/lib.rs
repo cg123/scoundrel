@@ -1,11 +1,13 @@
 #[cfg(feature = "gpu")]
 mod gpu;
 
-pub use scoundrel_algorithm as algorithm;
-pub use scoundrel_geometry as geometry;
+#[cfg(feature = "gpu")]
 pub use scoundrel_procedural::wgsl_module;
 #[cfg(feature = "ui")]
 pub use scoundrel_ui as ui;
+
+pub use scoundrel_algorithm as algorithm;
+pub use scoundrel_geometry as geometry;
 pub use scoundrel_util as util;
 
 #[cfg(feature = "ui")]

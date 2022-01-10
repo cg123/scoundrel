@@ -145,11 +145,6 @@ impl<T: Copy> Grid2D<T> {
             ci: self.iter_coords(),
         }
     }
-
-    pub unsafe fn iter_mut(&mut self) -> GridIteratorMut<T> {
-        let ci = self.iter_coords();
-        GridIteratorMut { grid: self, ci }
-    }
 }
 
 impl<
@@ -237,25 +232,6 @@ impl<'a, T: Copy> Iterator for GridIterator<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.ci.next().and_then(|pt| self.grid.get(pt))
-    }
-}
-
-pub struct GridIteratorMut<'a, T> {
-    grid: &'a mut Grid2D<T>,
-    ci: GridCoordIterator,
-}
-impl<'a, T: Copy> Iterator for GridIteratorMut<'a, T> {
-    type Item = &'a mut T;
-
-    fn next<'n>(&'n mut self) -> Option<Self::Item> {
-        unsafe {
-            if let Some(pt) = self.ci.next() {
-                let value: &'n mut T = self.grid.get_mut(pt).unwrap();
-                Some(std::mem::transmute(value))
-            } else {
-                None
-            }
-        }
     }
 }
 
