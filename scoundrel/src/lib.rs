@@ -1,17 +1,16 @@
 #[cfg(feature = "gpu")]
 mod gpu;
+#[cfg(feature = "terminal")]
+mod terminal;
 
 #[cfg(feature = "gpu")]
 pub use scoundrel_procedural::wgsl_module;
-#[cfg(feature = "ui")]
-pub use scoundrel_ui as ui;
+#[cfg(feature = "terminal")]
+pub use terminal::TerminalState;
 
 pub use scoundrel_algorithm as algorithm;
 pub use scoundrel_geometry as geometry;
 pub use scoundrel_util as util;
-
-#[cfg(feature = "ui")]
-use tui::{backend::CrosstermBackend, Terminal};
 
 use thiserror::Error;
 
@@ -27,8 +26,6 @@ pub enum EngineError {
 pub struct EngineState {
     #[cfg(feature = "gpu")]
     pub gpu: gpu::GpuState,
-    #[cfg(feature = "ui")]
-    pub terminal: Terminal<CrosstermBackend<std::io::Stdout>>,
 }
 
 pub struct Engine<S: GameState> {
@@ -56,8 +53,6 @@ pub trait GameState {
 impl<S: GameState> Engine<S> {
     pub fn new(game_state: S) -> Result<Engine<S>, EngineError> {
         let state = EngineState {
-            #[cfg(feature = "ui")]
-            terminal: Terminal::new(CrosstermBackend::new(std::io::stdout()))?,
             #[cfg(feature = "gpu")]
             gpu: gpu::GpuState::new_sync()?,
         };
