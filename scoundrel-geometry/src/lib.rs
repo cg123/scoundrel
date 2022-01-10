@@ -9,6 +9,7 @@ mod bresenham;
 pub mod grid2d;
 mod matrix;
 mod neighborhood;
+pub mod quadtree;
 pub mod vector;
 
 pub type Point = Vector2<i32>;

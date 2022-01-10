@@ -144,22 +144,11 @@ impl<T: Copy + Ord + ops::Add<T, Output = T>> Bounds<T> {
     }
 }
 
-/*impl<T: TryInto<Tp> + Copy, Tp: Copy> TryInto<Bounds<Tp>> for Bounds<T> {
-    type Error = <T as TryInto<Tp>>::Error;
-
-    fn try_into(self) -> Result<Bounds<Tp>, Self::Error> {
-        Ok(Bounds {
-            min: self.min.try_into()?,
-            max: self.max.try_into()?,
-        })
+impl<T: Copy + Ord> Bounds<T> {
+    pub fn closest_pt(&self, query: Vector2<T>) -> Vector2<T> {
+        Vector2::new(
+            std::cmp::min(std::cmp::max(self.min.x, query.x), self.max.x),
+            std::cmp::min(std::cmp::max(self.min.y, query.y), self.max.y),
+        )
     }
-}*/
-
-/*impl<T: Into<Tp> + Copy, Tp: Copy> Into<Bounds<Tp>> for Bounds<T> {
-    fn into(self) -> Bounds<Tp> {
-        Bounds {
-            min: self.min.into(),
-            max: self.max.into(),
-        }
-    }
-}*/
+}

@@ -41,6 +41,9 @@ pub trait Ring:
 }
 impl<T> Ring for T where T: std::ops::Add<Self, Output = Self> + std::ops::Mul<Self, Output = Self> {}
 
+pub trait DivisionRing: Ring + std::ops::Div<Self, Output = Self> {}
+impl<T> DivisionRing for T where T: Ring + std::ops::Div<Self, Output = Self> {}
+
 pub trait HasSqrt {
     fn _sqrt(&self) -> Self;
 }

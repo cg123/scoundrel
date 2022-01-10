@@ -1,3 +1,3 @@
 [workspace]
-members = ["scoundrel-algorithm", "scoundrel-geometry", "scoundrel-ui", "scoundrel-util", "scoundrel"]
+members = ["scoundrel-algorithm", "scoundrel-geometry", "scoundrel-ui", "scoundrel-util", "scoundrel-procedural", "scoundrel"]
 resolver = "2"

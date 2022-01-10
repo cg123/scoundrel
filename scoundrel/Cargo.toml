@@ -7,12 +7,16 @@ edition = "2021"
 scoundrel-algorithm = { path = "../scoundrel-algorithm" }
 scoundrel-geometry = { path = "../scoundrel-geometry" }
 scoundrel-util = { path = "../scoundrel-util" }
+scoundrel-procedural = { path = "../scoundrel-procedural" }
 scoundrel-ui = { path = "../scoundrel-ui", optional=true }
-wgpu = "0.12.0"
-pollster = "0.2.4"
-thiserror = "1.0.30"
+thiserror = "1.0"
+tui = { version = "0.16", optional = true, default-features = false, features = ["crossterm"] }
+
+wgpu = { version = "0.12", optional = true }
+naga = { version = "0.8", optional = true, features = ["wgsl-in", "validate", "codespan-reporting"] }
+pollster = { version = "0.2.4", optional = true }
 
 [features]
 serde = ["scoundrel-geometry/serde"]
-tui = ["scoundrel-geometry/tui"]
-ui = ["tui", "scoundrel-ui"]
+ui = ["scoundrel-ui", "scoundrel-geometry/tui", "tui"]
+gpu = [ "wgpu", "naga", "pollster" ]

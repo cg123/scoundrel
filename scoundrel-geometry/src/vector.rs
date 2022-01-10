@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use paste::paste;
 use scoundrel_util::ignore_ident;
 use scoundrel_util::numeric::{HasSqrt, HasZero, Ring};
@@ -66,6 +67,16 @@ macro_rules! vector_inplace_op {
     };
 }
 
+pub trait VectorN<T>:
+    From<Self::Tuple> + Into<Self::Tuple> + IntoIterator<Item = T> {
+    type Tuple;
+    const LENGTH: usize;
+}
+
+macro_rules! count_components {
+    ($($component:ident),+) => {(0usize $(+ ignore_ident!($component, 1))+)};
+}
+
 macro_rules! define_vector {
     ($name:ident{$($component:ident),+}) => {
         #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -76,16 +87,33 @@ macro_rules! define_vector {
             )+
         }
 
+        impl<T> VectorN<T> for $name<T> {
+            type Tuple = ( $(ignore_ident!($component, T)),+ );
+            const LENGTH: usize = count_components!( $($component),+ );
+        }
+
+        impl<T> IntoIterator for $name<T> {
+            type Item = T;
+            type IntoIter = <Vec<T> as IntoIterator>::IntoIter;
+            fn into_iter(self) -> Self::IntoIter {
+                vec![$(self.$component),+].into_iter()
+            }
+        }
+
+        impl<T> From< ( $(ignore_ident!($component, T)),+ ) > for $name<T> {
+            fn from(tup: <$name<T> as VectorN<T>>::Tuple) -> Self {
+                let ($($component),+) = tup;
+                Self { $($component),+ }
+            }
+        }
+        impl<T> From<$name<T>> for ( $(ignore_ident!($component, T)),+ ) {
+            fn from(vec: $name<T>) -> Self {
+                ( $(vec.$component),+ )
+            }
+        }
+
         impl<T> $name<T> {
             pub fn new($($component: T),+) -> Self {
-                Self {
-                    $(
-                    $component,
-                    )+
-                }
-            }
-            pub fn from_tuple(tuple: ( $(ignore_ident!($component, T)),+ )) -> Self {
-                let ($($component),+) = tuple;
                 Self {
                     $(
                     $component,
@@ -142,19 +170,6 @@ macro_rules! define_vector {
         impl<T: Ring + HasZero + Copy + HasSqrt + std::ops::Div<T, Output=Tp>, Tp> $name<T> {
             pub fn normalized(&self) -> $name<Tp> {
                 *self / self.magnitude()
-            }
-        }
-
-        impl<T: Copy> IntoIterator for $name<T> {
-            type Item = T;
-            type IntoIter = <Vec<T> as IntoIterator>::IntoIter;
-
-            fn into_iter(self) -> Self::IntoIter {
-                vec![
-                    $(
-                        self.$component,
-                    )+
-                ].into_iter()
             }
         }
 

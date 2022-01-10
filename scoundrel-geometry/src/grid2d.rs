@@ -138,16 +138,17 @@ impl<T: Copy> Grid2D<T> {
             ci: self.iter_coords(),
         }
     }
-    pub fn iter_mut(&mut self) -> GridIteratorMut<T> {
-        let ci = self.iter_coords();
-        GridIteratorMut { grid: self, ci }
-    }
 
     pub fn iter_neighborhoods(&self) -> GridNeighborhoodIterator<T> {
         GridNeighborhoodIterator {
             grid: self,
             ci: self.iter_coords(),
         }
+    }
+
+    pub unsafe fn iter_mut(&mut self) -> GridIteratorMut<T> {
+        let ci = self.iter_coords();
+        GridIteratorMut { grid: self, ci }
     }
 }
 
