@@ -38,15 +38,32 @@ pub enum TickResult {
     Exit,
 }
 
+pub trait GameStateSimple {
+    type Error: std::error::Error;
+    #[allow(unused)]
+    fn initialize(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    fn tick(&mut self) -> Result<TickResult, Self::Error>;
+}
+
 pub trait GameState {
     type Error: std::error::Error;
     #[allow(unused)]
-    fn initialize(&mut self, engine: &mut EngineState) -> Result<(), Self::Error> {
-        Ok(())
-    }
+    fn initialize(&mut self, engine: &mut EngineState) -> Result<(), Self::Error>;
     #[allow(unused)]
-    fn tick(&mut self, engine: &mut EngineState) -> Result<TickResult, Self::Error> {
-        Ok(TickResult::Exit)
+    fn tick(&mut self, engine: &mut EngineState) -> Result<TickResult, Self::Error>;
+}
+
+impl<T: GameStateSimple> GameState for T {
+    type Error = T::Error;
+
+    fn initialize(&mut self, _: &mut EngineState) -> Result<(), Self::Error> {
+        self.initialize()
+    }
+
+    fn tick(&mut self, _: &mut EngineState) -> Result<TickResult, Self::Error> {
+        self.tick()
     }
 }
 
