@@ -2,11 +2,20 @@ use crate::Point;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-#[derive(Default)]
 pub struct TileBin<T: Hash> {
     bins: HashMap<Point, Vec<T>>,
     positions: HashMap<T, Point>,
 }
+
+impl<T: Hash> Default for TileBin<T> {
+    fn default() -> Self {
+        Self {
+            bins: HashMap::new(),
+            positions: HashMap::new(),
+        }
+    }
+}
+
 
 impl<T: Hash + Eq> TileBin<T> {
     /// Insert a value into the index at a given position.

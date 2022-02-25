@@ -16,3 +16,4 @@ pub mod vector;
 pub type Point = Vector2<i32>;
 pub type Rect = Bounds<i32>;
 pub use grid2d::{Grid2D, GridCoordIterator, GridIterator, GridNeighborhoodIterator};
+pub use tilebin::TileBin;

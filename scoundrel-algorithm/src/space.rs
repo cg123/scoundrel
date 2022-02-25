@@ -1,4 +1,6 @@
 use scoundrel_geometry::{Grid2D, Neighbor, Point};
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::hash::Hash;
 use std::ops::Add;
 
@@ -26,6 +28,13 @@ pub trait MappableMap<T: Copy>: MapOf<T> + Sized {
             map: self,
             f,
             marker: Default::default(),
+        }
+    }
+
+    fn memoize(self) -> MemoizedMap<Self, T> {
+        MemoizedMap {
+            map: self,
+            cache: RefCell::new(HashMap::new()),
         }
     }
 }
@@ -95,6 +104,37 @@ impl<Map: MapOf<T> + Sized, T: Copy, Tp: Copy, F: Fn(T) -> Tp> MapOf<Tp>
 {
     fn get(&self, point: Self::Coordinate) -> Option<Tp> {
         self.map.get(point).map(&self.f)
+    }
+}
+
+pub struct MemoizedMap<Map: MapOf<T> + Sized, T: Copy>
+where
+    Map::Coordinate: Hash,
+{
+    map: Map,
+    cache: RefCell<HashMap<Map::Coordinate, Option<T>>>,
+}
+
+impl<Map: MapOf<T> + Sized, T: Copy> BaseMap for MemoizedMap<Map, T> {
+    type Coordinate = Map::Coordinate;
+    type Distance = Map::Distance;
+
+    fn neighbors(&self, point: Self::Coordinate) -> Vec<Self::Coordinate> {
+        self.map.neighbors(point)
+    }
+
+    fn distance(&self, pt0: Self::Coordinate, pt1: Self::Coordinate) -> Self::Distance {
+        self.map.distance(pt0, pt1)
+    }
+}
+
+impl<Map: MapOf<T> + Sized, T: Copy> MapOf<T> for MemoizedMap<Map, T> {
+    fn get(&self, point: Self::Coordinate) -> Option<T> {
+        *self
+            .cache
+            .borrow_mut()
+            .entry(point)
+            .or_insert_with(|| self.map.get(point))
     }
 }
 

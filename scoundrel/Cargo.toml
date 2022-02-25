@@ -17,6 +17,6 @@ naga = { version = "0.8", optional = true, features = ["wgsl-in", "validate", "c
 pollster = { version = "0.2.4", optional = true }
 
 [features]
-serde = ["scoundrel-geometry/serde"]
+serde = ["scoundrel-geometry/serde", "scoundrel-util/_serde"]
 terminal = ["scoundrel-geometry/tui", "tui", "crossterm"]
 gpu = [ "wgpu", "naga", "pollster", "scoundrel-procedural" ]
