@@ -16,7 +16,6 @@ impl<T: Hash> Default for TileBin<T> {
     }
 }
 
-
 impl<T: Hash + Eq> TileBin<T> {
     /// Insert a value into the index at a given position.
     /// If `false`, the given value was already present at the given location.
