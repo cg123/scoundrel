@@ -1,4 +1,4 @@
-use crate::{Neighbor, Point, Rect, Vector2};
+use crate::{MooreNeighbor, Point, Rect, Vector2};
 use scoundrel_util::numeric::HasSqrt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -180,14 +180,14 @@ impl<
             Some(&value) => value,
             None => return None,
         };
-        let neighbor_or_center = |n: Neighbor| {
+        let neighbor_or_center = |n: MooreNeighbor| {
             if let Some(&value) = self.get(at + n.offset()) {
                 (1, value)
             } else {
                 (0, center_value)
             }
         };
-        let grad = |n: Neighbor| {
+        let grad = |n: MooreNeighbor| {
             let (d_pos, e_pos) = neighbor_or_center(n);
             let (d_neg, e_neg) = neighbor_or_center(n.opposite());
             if d_pos + d_neg > 0 {
@@ -196,8 +196,8 @@ impl<
                 0.into()
             }
         };
-        let dv_dx = grad(Neighbor::Right);
-        let dv_dy = grad(Neighbor::Up);
+        let dv_dx = grad(MooreNeighbor::Right);
+        let dv_dy = grad(MooreNeighbor::Up);
         Some(Vector2::new(dv_dx, dv_dy))
     }
 }
@@ -246,7 +246,7 @@ impl<'a, T: Copy> Iterator for GridNeighborhoodIterator<'a, T> {
         if let Some(pt) = self.ci.next() {
             let v0 = *self.grid.get(pt).unwrap();
             let mut neighbors = [None; 8];
-            for n in Neighbor::all() {
+            for n in MooreNeighbor::all() {
                 neighbors[n.to_index()] = self.grid.get(pt + n.offset()).copied();
             }
             Some((v0, neighbors))

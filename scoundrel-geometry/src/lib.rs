@@ -1,7 +1,7 @@
 pub use bounds::Bounds;
 pub use bresenham::Bresenham;
 pub use matrix::Mat2;
-pub use neighborhood::Neighbor;
+pub use neighborhood::MooreNeighbor;
 pub use vector::{Axis2D, Vector2};
 
 mod bounds;

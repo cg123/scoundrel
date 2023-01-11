@@ -218,7 +218,7 @@ impl<T: Ring + std::ops::Sub<Output = T> + Copy> Vector3<T> {
     }
 }
 
-macro_rules! define_axis {
+macro_rules! define_axes {
     ($name:ident {$($case:ident),+}, $vector:ident) => {
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         pub enum $name {
@@ -262,9 +262,9 @@ macro_rules! define_axis {
         }
     };
 }
-define_axis!(Axis2D { X, Y }, Vector2);
-define_axis!(Axis3D { X, Y, Z }, Vector3);
-define_axis!(Axis4D { X, Y, Z, W }, Vector4);
+define_axes!(Axis2D { X, Y }, Vector2);
+define_axes!(Axis3D { X, Y, Z }, Vector3);
+define_axes!(Axis4D { X, Y, Z, W }, Vector4);
 
 #[derive(Error, Debug)]
 pub enum AxisError {

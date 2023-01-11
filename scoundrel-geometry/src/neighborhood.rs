@@ -29,7 +29,7 @@ macro_rules! int_enum {
 }
 
 int_enum! {
-    pub enum Neighbor {
+    pub enum MooreNeighbor {
         Up = 0,
         RightUp = 1,
         Right = 2,
@@ -41,40 +41,40 @@ int_enum! {
     }
 }
 
-impl Neighbor {
-    pub fn for_each<F: FnMut(Neighbor)>(mut f: F) {
+impl MooreNeighbor {
+    pub fn for_each<F: FnMut(MooreNeighbor)>(mut f: F) {
         for idx in 0..8 {
             f(Self::from_index(idx).unwrap())
         }
     }
-    pub fn all() -> Vec<Neighbor> {
+    pub fn all() -> Vec<MooreNeighbor> {
         (0..8).map(|idx| Self::from_index(idx).unwrap()).collect()
     }
 
-    pub fn opposite(&self) -> Neighbor {
+    pub fn opposite(&self) -> MooreNeighbor {
         Self::from_index((self.to_index() + 4) % 8).unwrap()
     }
 
     pub fn offset(&self) -> Point {
         let (dx, dy) = match self {
-            Neighbor::LeftUp => (-1, -1),
-            Neighbor::Up => (0, -1),
-            Neighbor::RightUp => (1, -1),
-            Neighbor::Right => (1, 0),
-            Neighbor::RightDown => (1, 1),
-            Neighbor::Down => (0, 1),
-            Neighbor::LeftDown => (-1, 1),
-            Neighbor::Left => (-1, 0),
+            MooreNeighbor::LeftUp => (-1, -1),
+            MooreNeighbor::Up => (0, -1),
+            MooreNeighbor::RightUp => (1, -1),
+            MooreNeighbor::Right => (1, 0),
+            MooreNeighbor::RightDown => (1, 1),
+            MooreNeighbor::Down => (0, 1),
+            MooreNeighbor::LeftDown => (-1, 1),
+            MooreNeighbor::Left => (-1, 0),
         };
         Point::new(dx, dy)
     }
 
     pub fn offset_magnitude(&self) -> f32 {
         match self {
-            Neighbor::Up => 1.0,
-            Neighbor::Right => 1.0,
-            Neighbor::Down => 1.0,
-            Neighbor::Left => 1.0,
+            MooreNeighbor::Up => 1.0,
+            MooreNeighbor::Right => 1.0,
+            MooreNeighbor::Down => 1.0,
+            MooreNeighbor::Left => 1.0,
             _ => std::f32::consts::SQRT_2,
         }
     }
@@ -82,29 +82,29 @@ impl Neighbor {
     // index of the neighbor in a row-major 3x3 window
     pub fn window_index(&self) -> usize {
         match self {
-            Neighbor::LeftUp => 0,
-            Neighbor::Up => 1,
-            Neighbor::RightUp => 2,
-            Neighbor::Left => 3,
+            MooreNeighbor::LeftUp => 0,
+            MooreNeighbor::Up => 1,
+            MooreNeighbor::RightUp => 2,
+            MooreNeighbor::Left => 3,
             // no Neighbor::Center
-            Neighbor::Right => 5,
-            Neighbor::LeftDown => 6,
-            Neighbor::Down => 7,
-            Neighbor::RightDown => 8,
+            MooreNeighbor::Right => 5,
+            MooreNeighbor::LeftDown => 6,
+            MooreNeighbor::Down => 7,
+            MooreNeighbor::RightDown => 8,
         }
     }
 
-    pub fn from_window_index(index: usize) -> Option<Neighbor> {
+    pub fn from_window_index(index: usize) -> Option<MooreNeighbor> {
         Some(match index {
-            0 => Neighbor::LeftUp,
-            1 => Neighbor::Up,
-            2 => Neighbor::RightUp,
-            3 => Neighbor::Left,
+            0 => MooreNeighbor::LeftUp,
+            1 => MooreNeighbor::Up,
+            2 => MooreNeighbor::RightUp,
+            3 => MooreNeighbor::Left,
             4 => return None,
-            5 => Neighbor::Right,
-            6 => Neighbor::LeftDown,
-            7 => Neighbor::Down,
-            8 => Neighbor::RightDown,
+            5 => MooreNeighbor::Right,
+            6 => MooreNeighbor::LeftDown,
+            7 => MooreNeighbor::Down,
+            8 => MooreNeighbor::RightDown,
             _ => return None,
         })
     }
