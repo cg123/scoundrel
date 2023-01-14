@@ -78,16 +78,10 @@ impl<'a, Map: MapOf<T>, T: Copy, Tp: Copy, F: Fn(T) -> Tp> MapOf<Tp>
 }
 
 pub trait TransformableMap<T> {
-    fn apply<Tp, F: Fn(T) -> Tp>(
-        &self,
-        functor: F,
-    ) -> MapFunctorView<Self, T, Tp, F>;
+    fn apply<Tp, F: Fn(T) -> Tp>(&self, functor: F) -> MapFunctorView<Self, T, Tp, F>;
 }
 impl<T: Copy, Map: MapOf<T>> TransformableMap<T> for Map {
-    fn apply<Tp, F: Fn(T) -> Tp>(
-        &self,
-        functor: F,
-    ) -> MapFunctorView<Self, T, Tp, F> {
+    fn apply<Tp, F: Fn(T) -> Tp>(&self, functor: F) -> MapFunctorView<Self, T, Tp, F> {
         MapFunctorView {
             map: self,
             functor,
