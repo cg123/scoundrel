@@ -12,5 +12,5 @@ tui = { version = "0.19", optional = true, default-features = false, features = 
 crossterm = { version = "0.25", optional = true }
 
 [features]
-serde = ["scoundrel-geometry/serde", "scoundrel-util/_serde"]
+serde = ["scoundrel-geometry/serde", "scoundrel-util/serde"]
 terminal = ["scoundrel-geometry/tui", "tui", "crossterm"]

@@ -31,7 +31,7 @@ impl<T: Hash + Eq> TileBin<T> {
     /// Remove a given value from the index.
     /// Returns `true` if the given value was found and removed.
     pub fn remove(&mut self, value: &T) -> bool {
-        if let Some(position) = self.positions.get(&value) {
+        if let Some(position) = self.positions.get(value) {
             if let Some(bin) = self.bins.get_mut(position) {
                 bin.retain(|v| v != value);
             }

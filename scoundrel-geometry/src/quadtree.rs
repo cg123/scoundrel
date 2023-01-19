@@ -21,7 +21,7 @@ impl<T> Node<T> {
     }
     fn child_coord(&self, query: Point) -> (usize, usize) {
         let (x_gt, y_gt) = self.gt_centroid(query);
-        (if x_gt { 1 } else { 0 }, if y_gt { 1 } else { 0 })
+        (x_gt.into(), y_gt.into())
     }
     fn coord_index(cx: usize, cy: usize) -> usize {
         cy * 2 + cx

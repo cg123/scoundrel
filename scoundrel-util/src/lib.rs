@@ -1,9 +1,11 @@
+mod ascii_glyph;
 mod intern_pool;
 mod memoizer;
 pub mod numeric;
 mod pointer_equality;
 mod pq_entry;
 
+pub use ascii_glyph::AsciiGlyph;
 pub use intern_pool::{InternID, InternPool};
 pub use memoizer::Memoizer;
 pub use numeric::NonNaN32;
