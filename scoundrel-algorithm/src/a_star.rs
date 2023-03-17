@@ -1,12 +1,27 @@
-use crate::space::{MapOf, Passability};
+use crate::graph::LabeledSpatialGraph;
 use scoundrel_util::PQEntry;
 use std::collections::{BinaryHeap, HashMap};
 
-pub fn a_star<M: MapOf<Passability>>(
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum Passability {
+    Passable,
+    Impassable,
+}
+
+/// Computes the shortest path between two points on a map using the A* algorithm.
+///
+/// Returns the shortest path as a vector of coordinates if one exists, or `None` otherwise.
+///
+/// # Arguments
+///
+/// * `map` - The map to compute the path on.
+/// * `start` - The starting coordinate for the path.
+/// * `end` - The ending coordinate for the path.
+pub fn a_star<M: LabeledSpatialGraph<Passability>>(
     map: M,
-    start: M::Coordinate,
-    end: M::Coordinate,
-) -> Option<Vec<M::Coordinate>> {
+    start: M::NodeHandle,
+    end: M::NodeHandle,
+) -> Option<Vec<M::NodeHandle>> {
     let mut came_from = HashMap::new();
     let mut running_cost = HashMap::new();
     let mut frontier = BinaryHeap::new();
@@ -22,8 +37,8 @@ pub fn a_star<M: MapOf<Passability>>(
             break;
         }
 
-        for candidate in map.neighbors(current) {
-            if let Some(Passability::Passable) = map.get(current) {
+        for candidate in map.adjacent_nodes(current) {
+            if let Some(Passability::Passable) = map.get(candidate) {
                 let new_cost =
                     *running_cost.get(&current).unwrap() + map.distance(current, candidate);
                 if !running_cost.contains_key(&candidate)

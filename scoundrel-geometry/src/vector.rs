@@ -77,7 +77,11 @@ macro_rules! count_components {
 }
 
 macro_rules! define_vector {
-    ($name:ident{$($component:ident),+}) => {
+    (
+        $(#[$outer:meta])*
+        $name:ident{$($component:ident),+}
+    ) => {
+        $(#[$outer])*
         #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
         #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
         pub struct $name<T> {
@@ -112,6 +116,7 @@ macro_rules! define_vector {
         }
 
         impl<T> $name<T> {
+            /// Creates a new vector with the given components.
             pub fn new($($component: T),+) -> Self {
                 Self {
                     $(
@@ -120,6 +125,7 @@ macro_rules! define_vector {
                 }
             }
 
+            /// Creates a new vector by applying a functor `f` to each element.
             pub fn map<F: FnMut(T) -> Tp, Tp>(self, mut f: F) -> $name<Tp> {
                 $name {
                     $(
@@ -145,28 +151,27 @@ macro_rules! define_vector {
             }
         }
 
-        impl<T: Copy> $name<T> {
-            pub fn to_tuple(self) -> ( $(ignore_ident!($component, T)),+ ) {
-                ($(self.$component),+)
-            }
-        }
-
         impl<T: Ring + HasZero + Copy> $name<T> {
+            /// Returns the dot product of this vector with another.
             pub fn dot(&self, rhs: &Self) -> T {
                 <T as HasZero>::zero() $( + self.$component * rhs.$component)+
             }
+
+            /// Returns the squared magnitude of this vector.
             pub fn sqr_magnitude(&self) -> T {
                 self.dot(self)
             }
         }
 
         impl<T: Ring + HasZero + Copy + HasSqrt> $name<T> {
+            /// Returns the magnitude of this vector.
             pub fn magnitude(&self) -> T {
                 self.sqr_magnitude()._sqrt()
             }
         }
 
         impl<T: Ring + HasZero + Copy + HasSqrt + std::ops::Div<T, Output=Tp>, Tp> $name<T> {
+            /// Returns a unit vector aligned with this one.
             pub fn normalized(&self) -> $name<Tp> {
                 *self / self.magnitude()
             }
@@ -209,6 +214,7 @@ impl<T> Vector4<T> {
 }
 
 impl<T: Ring + std::ops::Sub<Output = T> + Copy> Vector3<T> {
+    /// Returns the three-dimensional cross product of this vector with another.
     pub fn cross(&self, rhs: Self) -> Self {
         Self {
             x: self.y * rhs.z - self.z * rhs.y,
@@ -346,5 +352,88 @@ impl Axis2D {
             Axis2D::X => Axis2D::Y,
             Axis2D::Y => Axis2D::X,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_vector_creation() {
+        let v = Vector2::new(1, 2);
+        assert_eq!(v.x, 1);
+        assert_eq!(v.y, 2);
+
+        let v = Vector3::new(1, 2, 3);
+        assert_eq!(v.x, 1);
+        assert_eq!(v.y, 2);
+        assert_eq!(v.z, 3);
+
+        let v = Vector4::new(1, 2, 3, 4);
+        assert_eq!(v.x, 1);
+        assert_eq!(v.y, 2);
+        assert_eq!(v.z, 3);
+        assert_eq!(v.w, 4);
+    }
+
+    #[test]
+    fn test_vector_addition() {
+        let v1 = Vector2::new(1, 2);
+        let v2 = Vector2::new(2, 3);
+        let v3 = v1 + v2;
+        assert_eq!(v3.x, 3);
+        assert_eq!(v3.y, 5);
+
+        let v1 = Vector3::new(1, 2, 3);
+        let v2 = Vector3::new(2, 3, 4);
+        let v3 = v1 + v2;
+        assert_eq!(v3.x, 3);
+        assert_eq!(v3.y, 5);
+        assert_eq!(v3.z, 7);
+    }
+
+    #[test]
+    fn test_dot() {
+        let vec1 = Vector3::new(1, 2, 3);
+        let vec2 = Vector3::new(2, 3, 4);
+        let res = vec1.dot(&vec2);
+        assert_eq!(res, 20);
+    }
+
+    #[test]
+    fn test_cross() {
+        let vec1 = Vector3::new(1, 0, 0);
+        let vec2 = Vector3::new(0, 1, 0);
+        let res = vec1.cross(vec2);
+        assert_eq!(res.x, 0);
+        assert_eq!(res.y, 0);
+        assert_eq!(res.z, 1);
+    }
+
+    #[test]
+    fn test_map() {
+        let vec = Vector4::new(1, 2, 3, 4);
+        let res = vec.map(|x| x + 1);
+        assert_eq!(res.x, 2);
+        assert_eq!(res.y, 3);
+        assert_eq!(res.z, 4);
+        assert_eq!(res.w, 5);
+    }
+
+    #[test]
+    fn test_tuple_roundtrip() {
+        let vec = Vector4::new(1, 2, 3, 4);
+        let tup: (i32, i32, i32, i32) = vec.into();
+        assert_eq!(vec, tup.into());
+    }
+
+    #[test]
+    fn test_axis_indexing() {
+        let vec = Vector4::new(1, 2, 3, 4);
+        assert_eq!(vec.x, vec[Axis4D::X]);
+        assert_eq!(vec.y, vec[Axis4D::Y]);
+        assert_eq!(vec.z, vec[Axis4D::Z]);
+        assert_eq!(vec.w, vec[Axis4D::W]);
     }
 }

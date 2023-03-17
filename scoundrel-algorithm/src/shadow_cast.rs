@@ -1,7 +1,22 @@
-use super::space::{BaseMap, MapOf, Opacity};
+use super::graph::LabeledSpatialGraph;
 use scoundrel_geometry::*;
 use std::cmp::Ordering;
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum Opacity {
+    Opaque,
+    Transparent,
+}
+
+/// Returns a transformation matrix for the given octant.
+///
+/// # Arguments
+///
+/// * `octant` - The octant number (0-7).
+///
+/// # Returns
+///
+/// A `Mat2<i32>` transformation matrix that maps points in octant 0 to the given octant.
 fn octant_transform(octant: u32) -> Mat2<i32> {
     match octant {
         0 => Mat2::ident(),
@@ -16,6 +31,7 @@ fn octant_transform(octant: u32) -> Mat2<i32> {
     }
 }
 
+/// Represents a slope as a rise and run.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 struct Slope {
     pub rise: i32,
@@ -23,18 +39,15 @@ struct Slope {
 }
 
 impl Slope {
-    pub fn new(mut rise: i32, mut run: i32) -> Slope {
+    pub const ONE: Slope = Slope::new(1, 1);
+    pub const ZERO: Slope = Slope::new(0, 0);
+
+    pub const fn new(mut rise: i32, mut run: i32) -> Slope {
         if run < 0 {
             rise *= -1;
             run *= -1;
         }
         Slope { rise, run }
-    }
-    pub fn one() -> Slope {
-        Slope { rise: 1, run: 1 }
-    }
-    pub fn zero() -> Slope {
-        Slope { rise: 0, run: 0 }
     }
 }
 
@@ -54,7 +67,8 @@ impl Ord for Slope {
     }
 }
 
-fn _cast_light<M: MapOf<Opacity> + BaseMap<Coordinate = Point>, F: FnMut(Point)>(
+#[allow(clippy::too_many_arguments)]
+fn _cast_light<M: LabeledSpatialGraph<Opacity, NodeHandle = Point>, F: FnMut(Point)>(
     map: &M,
     origin: Point,
     range: i32,
@@ -124,7 +138,20 @@ fn _cast_light<M: MapOf<Opacity> + BaseMap<Coordinate = Point>, F: FnMut(Point)>
     }
 }
 
-pub fn cast_light<M: MapOf<Opacity> + BaseMap<Coordinate = Point>, F: FnMut(Point)>(
+/// Casts light in all directions from the given origin point.
+///
+/// # Arguments
+///
+/// * `map` - The map to cast light on.
+/// * `origin` - The origin point to cast light from.
+/// * `range` - The maximum range of the light.
+/// * `callback` - A callback function to call for each lit tile.
+///
+/// # Type Parameters
+///
+/// * `M` - The type of the map.
+/// * `F` - The type of the callback function.
+pub fn cast_light<M: LabeledSpatialGraph<Opacity, NodeHandle = Point>, F: FnMut(Point)>(
     map: &M,
     origin: Point,
     range: i32,
@@ -138,8 +165,8 @@ pub fn cast_light<M: MapOf<Opacity> + BaseMap<Coordinate = Point>, F: FnMut(Poin
             range,
             transform,
             1,
-            Slope::one(),
-            Slope::zero(),
+            Slope::ONE,
+            Slope::ZERO,
             &mut callback,
         );
     }

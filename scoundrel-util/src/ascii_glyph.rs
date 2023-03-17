@@ -3,6 +3,7 @@ use std::fmt::Display;
 #[cfg(feature = "serde")]
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
+/// An ASCII character that can be serialized as a string.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(transparent)]
 pub struct AsciiGlyph(u8);

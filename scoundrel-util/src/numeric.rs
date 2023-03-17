@@ -1,9 +1,12 @@
 use std::cmp::Ordering;
 use thiserror::Error;
 
+/// A trait representing a numeric type with a value equivalent to zero.
 pub trait HasZero {
     fn zero() -> Self;
 }
+
+/// A trait representing a numeric type with a value equivalent to one.
 pub trait HasOne {
     fn one() -> Self;
 }
@@ -35,15 +38,14 @@ impl_has!(
 impl_has!(HasZero, [f32, f64], zero, 0.0);
 impl_has!(HasOne, [f32, f64], one, 1.0);
 
+/// A trait for types that support both addition and multiplication.
 pub trait Ring:
     std::ops::Add<Self, Output = Self> + std::ops::Mul<Self, Output = Self> + Sized
 {
 }
 impl<T> Ring for T where T: std::ops::Add<Self, Output = Self> + std::ops::Mul<Self, Output = Self> {}
 
-pub trait DivisionRing: Ring + std::ops::Div<Self, Output = Self> {}
-impl<T> DivisionRing for T where T: Ring + std::ops::Div<Self, Output = Self> {}
-
+/// A trait for types that have a square root function.
 pub trait HasSqrt {
     fn _sqrt(&self) -> Self;
 }
@@ -58,7 +60,11 @@ impl HasSqrt for f64 {
     }
 }
 
+/// A `NonNaN32` is a 32 bit floating point value, guaranteed to not be NaN.
+///
+/// Useful for ordering.
 #[derive(Copy, Clone, PartialEq)]
+#[repr(transparent)]
 pub struct NonNaN32 {
     value: f32,
 }

@@ -1,7 +1,14 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub struct Memoizer<Argument: Hash + Eq + Clone, Out: Clone, F: FnMut(Argument) -> Out> {
+/// A memoizer is a function that stores the results of expensive function calls and returns the
+/// cached result when the same inputs occur again.
+pub struct Memoizer<Argument, Out, F>
+where
+    Argument: Hash + Eq + Clone,
+    Out: Clone,
+    F: FnMut(Argument) -> Out,
+{
     f: F,
     cache: HashMap<Argument, Out>,
 }
@@ -9,6 +16,7 @@ pub struct Memoizer<Argument: Hash + Eq + Clone, Out: Clone, F: FnMut(Argument) 
 impl<Argument: Hash + Eq + Clone, Out: Clone, F: FnMut(Argument) -> Out>
     Memoizer<Argument, Out, F>
 {
+    /// Create a new memoizer that stores the results of the given function.
     pub fn new(f: F) -> Self {
         Self {
             f,
@@ -16,6 +24,9 @@ impl<Argument: Hash + Eq + Clone, Out: Clone, F: FnMut(Argument) -> Out>
         }
     }
 
+    /// Get the memoized result of the function with the given argument. If the argument has been
+    /// seen before, the cached result is returned; otherwise, the function is called and the result
+    /// is stored in the cache before being returned.
     pub fn value(&mut self, argument: Argument) -> Out {
         self.cache
             .entry(argument.clone())

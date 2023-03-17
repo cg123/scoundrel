@@ -1,11 +1,14 @@
 use super::Point;
 
 macro_rules! int_enum {
-    ($vis:vis enum $name:ident {
+    (
+        $(#[$outer:meta])*
+        $vis:vis enum $name:ident {
         $(
             $mem:ident = $val:literal
         ),+ $(,)?
     }) => {
+        $(#[$outer])*
         #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
         $vis enum $name {
             $(
@@ -29,6 +32,7 @@ macro_rules! int_enum {
 }
 
 int_enum! {
+    /// An enumeration representing the 8 possible neighbors in a Moore neighborhood.
     pub enum MooreNeighbor {
         Up = 0,
         RightUp = 1,
@@ -42,19 +46,24 @@ int_enum! {
 }
 
 impl MooreNeighbor {
+    /// Calls the provided closure `f` once for each `MooreNeighbor` variant, in the order they are defined.
     pub fn for_each<F: FnMut(MooreNeighbor)>(mut f: F) {
         for idx in 0..8 {
             f(Self::from_index(idx).unwrap())
         }
     }
+
+    /// Returns a vector containing all `MooreNeighbor` variants, in the order they are defined.
     pub fn all() -> Vec<MooreNeighbor> {
         (0..8).map(|idx| Self::from_index(idx).unwrap()).collect()
     }
 
+    /// Returns the `MooreNeighbor` variant that is opposite to this one.
     pub fn opposite(&self) -> MooreNeighbor {
         Self::from_index((self.to_index() + 4) % 8).unwrap()
     }
 
+    /// Returns the offset from the origin to the neighboring point.
     pub fn offset(&self) -> Point {
         let (dx, dy) = match self {
             MooreNeighbor::LeftUp => (-1, -1),
@@ -69,6 +78,8 @@ impl MooreNeighbor {
         Point::new(dx, dy)
     }
 
+    /// Returns the magnitude of the offset from the origin to the neighboring point in the corresponding direction.
+    /// This is `sqrt(2)` for diagonal neighbors, and `1` for non-diagonal neighbors.
     pub fn offset_magnitude(&self) -> f32 {
         match self {
             MooreNeighbor::Up => 1.0,
@@ -79,7 +90,7 @@ impl MooreNeighbor {
         }
     }
 
-    // index of the neighbor in a row-major 3x3 window
+    /// Returns the index of this neighbor in a row-major 3x3 window.
     pub fn window_index(&self) -> usize {
         match self {
             MooreNeighbor::LeftUp => 0,
@@ -94,6 +105,8 @@ impl MooreNeighbor {
         }
     }
 
+    /// Returns the `MooreNeighbor` variant corresponding to the given index in a row-major 3x3 window.
+    /// Returns `None` if there is no appropriate variant.
     pub fn from_window_index(index: usize) -> Option<MooreNeighbor> {
         Some(match index {
             0 => MooreNeighbor::LeftUp,
