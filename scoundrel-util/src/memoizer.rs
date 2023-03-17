@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-/// A memoizer is a function that stores the results of expensive function calls and returns the
-/// cached result when the same inputs occur again.
+/// Stores the results of function calls and returns the cached result when the same
+/// inputs occur again.
 pub struct Memoizer<Argument, Out, F>
 where
     Argument: Hash + Eq + Clone,
