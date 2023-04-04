@@ -148,7 +148,56 @@ impl<
         let max = min + size;
         Bounds { min, max }
     }
+
+    pub fn center(&self) -> Vector2<T> {
+        (self.min + self.max) / 2_i32.into()
+    }
+
+    pub fn quadrant(&self, index: usize) -> Self {
+        let (x_lt, y_lt) = match index {
+            0 => (false, false),
+            1 => (true, false),
+            2 => (true, true),
+            3 => (false, true),
+            _ => panic!("invalid quadrant number"),
+        };
+
+        let center = self.center();
+
+        let min = Vector2::new(
+            if x_lt { self.min.x } else { center.x },
+            if y_lt { self.min.y } else { center.y },
+        );
+        let max = Vector2::new(
+            if x_lt { center.x } else { self.max.x },
+            if y_lt { center.y } else { self.max.y },
+        );
+        Self::with_points(min, max)
+    }
 }
+
+impl<
+        T: Copy
+            + ops::Add<T, Output = T>
+            + ops::Sub<T, Output = T>
+            + ops::Div<T, Output = T>
+            + From<i32>
+            + PartialOrd<T>,
+    > Bounds<T>
+{
+    pub fn containing_quadrant_idx(&self, query: Vector2<T>) -> usize {
+        let center = self.center();
+        let x_lt = query.x < center.x;
+        let y_lt = query.y < center.y;
+        match (x_lt, y_lt) {
+            (false, false) => 0,
+            (true, false) => 1,
+            (true, true) => 2,
+            (false, true) => 3,
+        }
+    }
+}
+
 impl<T: Copy + Ord + ops::Add<T, Output = T>> Bounds<T> {
     pub fn sub_rect(&self, offset: Vector2<T>, size: Vector2<T>) -> Bounds<T> {
         let pt1 = self.min + offset;
