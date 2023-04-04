@@ -109,6 +109,16 @@ impl<T> Grid2D<T> {
         }
     }
 
+    pub fn set(&mut self, pt: Point, value: T) -> bool {
+        match self.get_mut(pt) {
+            Some(val) => {
+                *val = value;
+                true
+            }
+            _ => false,
+        }
+    }
+
     /// Applies a function to each element of the grid and returns a new grid with the results.
     /// The function `f` should take an element of the grid as its argument and return a new value.
     ///
@@ -126,7 +136,7 @@ impl<T> Grid2D<T> {
 
     /// Maps the given function over the coordinates of the grid and returns a new grid with the
     /// result of the function at each coordinate.
-    pub fn map_coords<P: Copy, F: FnMut(Point) -> P>(&self, f: &mut F) -> Grid2D<P> {
+    pub fn map_coords<P: Copy, F: FnMut(Point) -> P>(&self, mut f: F) -> Grid2D<P> {
         let data = (0..self.data.len()).map(|idx| {
             let x = idx % (self._width as usize);
             let y = idx / (self._width as usize);
