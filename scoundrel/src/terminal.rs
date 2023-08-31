@@ -1,7 +1,7 @@
 use crate::geometry::{Point, Rect};
 use crossterm::{
     event,
-    event::{Event, KeyEvent},
+    event::{Event, KeyEvent, KeyEventKind},
     terminal::enable_raw_mode,
 };
 use std::io;
@@ -27,7 +27,7 @@ impl TerminalState {
     pub fn update_keyboard(&mut self, timeout: Duration) -> io::Result<()> {
         if event::poll(timeout)? {
             self.pressed = match event::read() {
-                Ok(Event::Key(event)) => Some(event),
+                Ok(Event::Key(event)) if event.kind == KeyEventKind::Press => Some(event),
                 _ => None,
             };
         } else {

@@ -8,8 +8,8 @@ scoundrel-algorithm = { path = "../scoundrel-algorithm" }
 scoundrel-geometry = { path = "../scoundrel-geometry" }
 scoundrel-util = { path = "../scoundrel-util" }
 thiserror = "1.0"
-tui = { package = "ratatui", version = "0.20.1", optional = true, default-features = false, features = ["crossterm"] }
-crossterm = { version = "0.26.1", optional = true }
+tui = { package = "ratatui", version = "0.23", optional = true, default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.27.0", optional = true }
 
 [features]
 serde = ["scoundrel-geometry/serde", "scoundrel-util/serde"]
