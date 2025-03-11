@@ -37,8 +37,8 @@ impl TerminalState {
     }
 
     pub fn size(&self) -> io::Result<Point> {
-        let r: Rect = self.terminal.size()?.into();
-        Ok(r.size())
+        let sz: tui::prelude::Size = self.terminal.size()?;
+        Ok(sz.into())
     }
 
     pub fn draw<F: FnOnce(&mut Frame)>(&mut self, f: F) {

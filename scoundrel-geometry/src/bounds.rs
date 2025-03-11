@@ -3,7 +3,7 @@ use crate::Vector2;
 use serde::{Deserialize, Serialize};
 use std::ops;
 #[cfg(feature = "tui")]
-use tui::layout::Rect;
+use tui::layout::{Rect, Size};
 
 /// A bounding box in two-dimensional space defined by a minimum and maximum point.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -131,6 +131,13 @@ impl<T: Copy + TryInto<u16> + ops::Sub<T, Output = T>> TryInto<tui::layout::Rect
             width: self.size().x.try_into()?,
             height: self.size().y.try_into()?,
         })
+    }
+}
+
+#[cfg(feature = "tui")]
+impl<T: Copy + From<u16>> From<Size> for Vector2<T> {
+    fn from(other: Size) -> Self {
+        Vector2::new(other.width.into(), other.height.into())
     }
 }
 
