@@ -41,7 +41,7 @@ impl TerminalState {
         Ok(r.size())
     }
 
-    pub fn draw<F: FnOnce(&mut Frame<CrosstermBackend<io::Stdout>>)>(&mut self, f: F) {
+    pub fn draw<F: FnOnce(&mut Frame)>(&mut self, f: F) {
         self.terminal.draw(f).expect("Failed to draw!");
     }
 }

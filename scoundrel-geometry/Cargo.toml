@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 scoundrel-util = { path = "../scoundrel-util" }
-tui = { package = "ratatui", version = "0.23.0", default-features = false, features = ["crossterm"], optional=true }
+tui = { package = "ratatui", version = "0.25.0", default-features = false, features = ["crossterm"], optional=true }
 serde = { version = "1.0", optional=true, features=["derive"]}
 paste = "1.0.14"
 thiserror = "1.0"
