@@ -1,10 +1,10 @@
-use scoundrel_algorithm::{cast_light, Opacity};
+use scoundrel_algorithm::{cast_light_2d, Opacity};
 use scoundrel_geometry::{Grid2D, Point};
 use std::collections::{HashMap, HashSet};
 
 fn _compute_fov(map: &Grid2D<Opacity>, origin: Point, radius: i32) -> HashSet<Point> {
     let mut visible = HashSet::new();
-    cast_light(map, origin, radius, |point| {
+    cast_light_2d(map, origin, radius, |point| {
         visible.insert(point);
     });
     visible
