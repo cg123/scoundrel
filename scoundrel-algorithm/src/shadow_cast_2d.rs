@@ -124,7 +124,10 @@ impl TileShape for DiamondTileShape {
     }
 }
 
-/// Exact implementation of Adam Milazzo's algorithm with beveled corners
+/// Implementation of the tile shape used in Adam Milazzo's algorithm.
+///
+/// The algorithm is described in detail in his blog post:
+/// http://www.adammil.net/blog/v125_Roguelike_Vision_Algorithms.html
 pub struct AdamMilazzoTileShape<'a, M: LabeledSpatialGraph<Opacity, NodeHandle = Point>> {
     map: &'a M,
     origin: Point,
@@ -232,9 +235,6 @@ impl<'a, M: LabeledSpatialGraph<Opacity, NodeHandle = Point>> TileShape
         }
     }
 }
-
-// Keep the original BeveledTileShape as an alias for AdamMilazzoTileShape
-pub type BeveledTileShape<'a, M> = AdamMilazzoTileShape<'a, M>;
 
 #[allow(clippy::too_many_arguments)]
 fn _cast_light<M, F, T>(
@@ -414,7 +414,7 @@ pub fn cast_light_2d_beveled<
     callback(origin);
     for octant in 0..8 {
         let transform = octant_transform(octant);
-        let tile_shape = BeveledTileShape::new(map, origin, transform);
+        let tile_shape = AdamMilazzoTileShape::new(map, origin, transform);
         _cast_light(
             map,
             origin,
