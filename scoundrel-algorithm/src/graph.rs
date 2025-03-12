@@ -24,9 +24,25 @@ pub trait LabeledGraph<Label: Copy>: BaseGraph {
 /// This struct is useful when you want to use a graph that has labels of one type (`T`), but you need to work with a graph that has labels of another type (`Tp`), obtained by applying a mapping function `F: Fn(T) -> Tp` to the original labels.
 ///
 /// The `GraphFunctorView` struct implements the `BaseGraph` trait, so it can be used wherever one is expected. The `get` method returns the mapped value, or `None` if the original graph did not contain the given node.
+/// A view adapter that transforms graph labels through a mapping function.
+///
+/// This struct allows you to reinterpret a graph with one label type as a graph
+/// with a different label type by applying a transformation function.
+///
+/// # Type Parameters
+/// * `'a` - Lifetime of the source graph reference
+/// * `Graph` - The original graph type
+/// * `T` - The original label type
+/// * `Tp` - The transformed label type
+/// * `F` - The transformation function type
 pub struct GraphFunctorView<'a, Graph: ?Sized, T, Tp, F> {
+    /// Reference to the original graph
     graph: &'a Graph,
+
+    /// Function that transforms labels from type T to type Tp
     functor: F,
+
+    /// Type marker for the input and output label types
     marker: PhantomData<(T, Tp)>,
 }
 

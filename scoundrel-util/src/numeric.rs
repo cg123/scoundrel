@@ -69,6 +69,16 @@ pub struct NonNaN32 {
     value: f32,
 }
 impl NonNaN32 {
+    /// Creates a new `NonNaN32` from a floating-point value.
+    ///
+    /// # Arguments
+    /// * `value` - The floating-point value to wrap
+    ///
+    /// # Returns
+    /// A new `NonNaN32` containing the given value
+    ///
+    /// # Panics
+    /// Panics if the provided value is NaN
     pub fn new(value: f32) -> Self {
         assert!(!value.is_nan());
         Self { value }
@@ -88,8 +98,13 @@ impl Add for NonNaN32 {
     }
 }
 
+/// Error type for operations involving `NonNaN32` values.
+///
+/// This enum represents the possible errors that can occur when
+/// attempting to create a `NonNaN32` from a floating-point value.
 #[derive(Error, Debug)]
 pub enum NonNanError {
+    /// Error returned when attempting to create a `NonNaN32` from a NaN value.
     #[error("you had one job")]
     IsNaN,
 }

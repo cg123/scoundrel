@@ -1,19 +1,51 @@
 use crate::{Point, Rect};
 
+/// The payload of a quadtree node, which can be either leaf contents or child nodes.
+///
+/// A quadtree node is either a leaf node containing a list of items, or an internal
+/// node with four children corresponding to the four quadrants of the node's bounds.
 #[derive(Debug)]
 pub enum NodePayload<T> {
+    /// A leaf node containing a list of items with their positions.
     Contents(Vec<(T, Point)>),
-    // x-y-, x+y-, x-y+, x+y+
+
+    /// An internal node with four children in the following order:
+    /// - 0: upper-right quadrant (x+, y+)
+    /// - 1: upper-left quadrant (x-, y+)  
+    /// - 2: lower-left quadrant (x-, y-)
+    /// - 3: lower-right quadrant (x+, y-)
     Children(Box<[Node<T>; 4]>),
 }
 
+/// A node in a quadtree spatial data structure.
+///
+/// Each node represents a rectangular region of space and either contains
+/// items directly (leaf node) or has been subdivided into four child nodes
+/// (internal node). This structure enables efficient spatial queries.
 #[derive(Debug)]
 pub struct Node<T> {
+    /// The rectangular bounds of the space this node represents.
     bounds: Rect,
+
+    /// The payload of this node (either items or child nodes).
     payload: NodePayload<T>,
 }
 
 impl<T> Node<T> {
+    /// Finds the item nearest to the query point in this node's subtree.
+    ///
+    /// This method implements a spatial nearest-neighbor search. It uses the
+    /// quadtree structure to efficiently prune the search space, checking
+    /// nearby quadrants first and avoiding quadrants that cannot contain a
+    /// better match than the current best.
+    ///
+    /// # Arguments
+    /// * `query` - The point to find the nearest item to
+    /// * `best` - The current best match, if any (used for recursive calls)
+    ///
+    /// # Returns
+    /// An option containing a tuple of (squared distance, reference to item)
+    /// for the nearest item found, or None if the node contains no items.
     pub fn nearest<'a>(
         &'a self,
         query: Point,
@@ -45,6 +77,29 @@ impl<T> Node<T> {
         best
     }
 
+    /// Finds all items contained within the specified rectangular region.
+    ///
+    /// This method efficiently queries the quadtree to find all items whose
+    /// positions are inside the given rectangle. It uses the tree structure
+    /// to quickly prune branches that don't intersect with the query region.
+    ///
+    /// # Arguments
+    /// * `rect` - The rectangular region to query
+    /// * `f` - A callback function that will be invoked for each item found
+    ///
+    /// # Example
+    /// ```
+    /// # use scoundrel_geometry::{quadtree, Rect, Point};
+    /// # let items = vec![(1, Point::new(5, 5)), (2, Point::new(15, 15))];
+    /// # let bounds = Rect::with_points(Point::new(0, 0), Point::new(20, 20));
+    /// # let tree = quadtree::build_quadtree(items, bounds, 2);
+    /// let mut results = Vec::new();
+    /// tree.query_rect(
+    ///     Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
+    ///     &mut |&(id, _)| { results.push(id); }
+    /// );
+    /// assert_eq!(results, vec![1]); // Only the item at (5,5) is found
+    /// ```
     pub fn query_rect<F: FnMut(&(T, Point))>(&self, rect: Rect, f: &mut F) {
         if !self.bounds.intersects(&rect) {
             return;
@@ -67,6 +122,38 @@ impl<T> Node<T> {
     }
 }
 
+/// Builds a quadtree from a collection of items with associated positions.
+///
+/// This function recursively constructs a quadtree by dividing space into quadrants
+/// and distributing items among those quadrants. The process continues until either:
+/// - A node contains 0 or 1 items
+/// - The maximum depth limit is reached
+/// - All items in a node are at the same position
+///
+/// # Arguments
+/// * `items` - A vector of items with their associated 2D positions
+/// * `bounds` - The rectangular bounds of the entire space
+/// * `max_depth` - The maximum recursion depth for tree construction
+///
+/// # Returns
+/// A quadtree node representing the root of the constructed tree
+///
+/// # Example
+/// ```
+/// use scoundrel_geometry::{quadtree, Point, Rect};
+///
+/// // Create some items with positions
+/// let items = vec![(1, Point::new(1, 1)), (2, Point::new(8, 8))];
+///
+/// // Build a quadtree with the items
+/// let tree = quadtree::build_quadtree(
+///     items,
+///     Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
+///     2
+/// );
+///
+/// // Use the tree for spatial queries
+/// ```
 pub fn build_quadtree<T>(items: Vec<(T, Point)>, bounds: Rect, max_depth: usize) -> Node<T> {
     if items.len() <= 1 || max_depth == 0 {
         return Node {

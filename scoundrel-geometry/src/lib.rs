@@ -27,6 +27,11 @@ pub type Point3 = Vector3<i32>;
 ///
 /// Alias for `Bounds<i32>`.
 pub type Rect = Bounds<i32>;
+/// Grid data structure and related iterators.
 pub use grid2d::{Grid2D, GridCoordIterator, GridIterator, GridNeighborhoodIterator};
+
+/// Half space and orthogonal line primitives for spatial partitioning.
 pub use half_space::{AxialHalfSpace, OrthoLine};
+
+/// Spatial lookup data structure for tile-based games.
 pub use tilebin::TileBin;
