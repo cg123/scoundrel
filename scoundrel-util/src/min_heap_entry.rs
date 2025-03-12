@@ -1,7 +1,9 @@
 use std::cmp::Ordering;
 
-/// A priority queue entry with a value and a priority.
 #[derive(Debug, Clone)]
+/// A priority queue entry with a value and a priority.
+/// A struct representing an entry in a min-heap with a value and a priority.
+/// The priority determines the order of the entries in the heap.
 pub struct MinHeapEntry<T, P> {
     pub value: T,
     pub priority: P,
