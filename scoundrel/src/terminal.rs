@@ -1,4 +1,4 @@
-use crate::geometry::{Point, Rect};
+use crate::geometry::Point;
 use crossterm::{
     event,
     event::{Event, KeyEvent, KeyEventKind},

@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::hash::Hash;
 use std::ops::{Index, IndexMut};
 use thiserror::Error;
+#[cfg(feature = "tui")]
+use tui::layout::Position;
 
 macro_rules! binop_rhs {
     ($component:ident, $rhs:ident, vec) => {
@@ -352,6 +354,25 @@ impl Axis2D {
             Axis2D::X => Axis2D::Y,
             Axis2D::Y => Axis2D::X,
         }
+    }
+}
+
+#[cfg(feature = "tui")]
+impl<T: Copy + From<u16>> From<Position> for Vector2<T> {
+    fn from(pos: Position) -> Self {
+        Vector2::new(pos.x.into(), pos.y.into())
+    }
+}
+
+#[cfg(feature = "tui")]
+impl<T: Copy + TryInto<u16>> TryFrom<Vector2<T>> for Position {
+    type Error = <T as TryInto<u16>>::Error;
+
+    fn try_from(vec: Vector2<T>) -> Result<Self, Self::Error> {
+        Ok(Position {
+            x: vec.x.try_into()?,
+            y: vec.y.try_into()?,
+        })
     }
 }
 
