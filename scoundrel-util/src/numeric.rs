@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, ops::Add};
 use thiserror::Error;
 
 /// A trait representing a numeric type with a value equivalent to zero.
@@ -63,7 +63,7 @@ impl HasSqrt for f64 {
 /// A `NonNaN32` is a 32 bit floating point value, guaranteed to not be NaN.
 ///
 /// Useful for ordering.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 #[repr(transparent)]
 pub struct NonNaN32 {
     value: f32,
@@ -77,6 +77,14 @@ impl NonNaN32 {
 impl From<NonNaN32> for f32 {
     fn from(x: NonNaN32) -> Self {
         x.value
+    }
+}
+
+impl Add for NonNaN32 {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self::new(self.value + other.value)
     }
 }
 

@@ -22,13 +22,15 @@ impl<T, P: Ord> PartialOrd<Self> for PQEntry<T, P> {
     /// Returns `Some(Ordering)` if the priorities are comparable, and `None`
     /// otherwise.
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.priority.partial_cmp(&other.priority)
+        // flip the ordering to get a min-heap
+        other.priority.partial_cmp(&self.priority)
     }
 }
 
 impl<T, P: Ord> Ord for PQEntry<T, P> {
     /// Compares the priorities of `self` and `other`.
     fn cmp(&self, other: &Self) -> Ordering {
-        self.priority.cmp(&other.priority)
+        // flip the ordering to get a min-heap
+        other.priority.cmp(&self.priority)
     }
 }
