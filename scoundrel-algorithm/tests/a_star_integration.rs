@@ -1,79 +1,23 @@
-use scoundrel_algorithm::{a_star, BaseGraph, LabeledGraph, Passability, SpatialGraph};
-use scoundrel_geometry::Vector2;
-use scoundrel_util::NonNaN32;
+use scoundrel_algorithm::{a_star, Passability};
+use scoundrel_geometry::{Grid2D, Point, Vector2};
 
-// Integration test grid implementation
-struct TestGrid {
-    width: i32,
-    height: i32,
-    walls: Vec<Vector2<i32>>,
-}
+fn _make_path_grid(width: i32, height: i32, walls: Vec<Vector2<i32>>) -> Grid2D<Passability> {
+    // Create a grid filled with passable cells
+    let mut grid = Grid2D::new(width, height, Passability::Passable);
 
-impl TestGrid {
-    fn new(width: i32, height: i32, walls: Vec<Vector2<i32>>) -> Self {
-        Self {
-            width,
-            height,
-            walls,
-        }
+    // Mark wall cells as impassable
+    for wall in walls {
+        // Convert Vector2<i32> to Point for Grid2D compatibility
+        let point = Point::new(wall.x, wall.y);
+        grid.set(point, Passability::Impassable);
     }
 
-    fn in_bounds(&self, pos: Vector2<i32>) -> bool {
-        pos.x >= 0 && pos.x < self.width && pos.y >= 0 && pos.y < self.height
-    }
-}
-
-impl BaseGraph for TestGrid {
-    type NodeHandle = Vector2<i32>;
-
-    fn adjacent_nodes(&self, node: Self::NodeHandle) -> Vec<Self::NodeHandle> {
-        // Include diagonal moves for integration test
-        let dirs = [
-            Vector2::new(0, 1),   // up
-            Vector2::new(1, 1),   // up-right
-            Vector2::new(1, 0),   // right
-            Vector2::new(1, -1),  // down-right
-            Vector2::new(0, -1),  // down
-            Vector2::new(-1, -1), // down-left
-            Vector2::new(-1, 0),  // left
-            Vector2::new(-1, 1),  // up-left
-        ];
-
-        dirs.iter()
-            .map(|dir| node + *dir)
-            .filter(|pos| self.in_bounds(*pos))
-            .collect()
-    }
-}
-
-impl LabeledGraph<Passability> for TestGrid {
-    fn get(&self, node: Self::NodeHandle) -> Option<Passability> {
-        if !self.in_bounds(node) {
-            return None;
-        }
-
-        if self.walls.contains(&node) {
-            Some(Passability::Impassable)
-        } else {
-            Some(Passability::Passable)
-        }
-    }
-}
-
-impl SpatialGraph for TestGrid {
-    type Distance = NonNaN32;
-
-    fn distance(&self, from: Self::NodeHandle, to: Self::NodeHandle) -> Self::Distance {
-        let dx = (to.x - from.x) as f32;
-        let dy = (to.y - from.y) as f32;
-        NonNaN32::new((dx * dx + dy * dy).sqrt())
-    }
+    grid
 }
 
 #[test]
 fn test_complex_path_finding() {
     // Create a more complex maze-like grid for integration testing
-
     let start = Vector2::new(1, 1);
     let end = Vector2::new(3, 3);
 
@@ -114,10 +58,9 @@ fn test_complex_path_finding() {
         Vector2::new(2, 5),
     ];
 
-    let grid = TestGrid::new(7, 7, walls);
+    let grid = _make_path_grid(7, 7, walls);
 
     // Test finding a path through the maze
-
     let path = a_star(&grid, start, end);
     assert!(path.is_some(), "Should find a path through the maze");
 
@@ -134,8 +77,11 @@ fn test_complex_path_finding() {
 
     // Verify path doesn't go through walls
     for pos in &path_vec {
-        assert!(
-            !grid.walls.contains(pos),
+        // Convert Vector2 to Point for Grid2D compatibility
+        let point = Point::new(pos.x, pos.y);
+        assert_eq!(
+            grid.get(point),
+            Some(&Passability::Passable),
             "Path should not go through walls"
         );
     }
@@ -144,7 +90,7 @@ fn test_complex_path_finding() {
 #[test]
 fn test_path_efficiency() {
     // Create an open grid with no walls
-    let grid = TestGrid::new(10, 10, vec![]);
+    let grid = _make_path_grid(10, 10, vec![]);
 
     // Test that we get the most efficient path (diagonal in this case)
     let start = Vector2::new(0, 0);

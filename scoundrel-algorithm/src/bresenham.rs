@@ -69,3 +69,131 @@ impl Bresenham {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_line_basic() {
+        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(3, 2)).collect();
+        assert_eq!(
+            line,
+            vec![
+                Point::new(0, 0),
+                Point::new(1, 1),
+                Point::new(2, 1),
+                Point::new(3, 2)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_line_reverse() {
+        let line: Vec<Point> = Bresenham::new(Point::new(3, 2), Point::new(0, 0)).collect();
+        assert_eq!(
+            line,
+            vec![
+                Point::new(3, 2),
+                Point::new(2, 1),
+                Point::new(1, 1),
+                Point::new(0, 0)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_horizontal_line() {
+        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(5, 0)).collect();
+        assert_eq!(
+            line,
+            vec![
+                Point::new(0, 0),
+                Point::new(1, 0),
+                Point::new(2, 0),
+                Point::new(3, 0),
+                Point::new(4, 0),
+                Point::new(5, 0)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_vertical_line() {
+        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(0, 5)).collect();
+        assert_eq!(
+            line,
+            vec![
+                Point::new(0, 0),
+                Point::new(0, 1),
+                Point::new(0, 2),
+                Point::new(0, 3),
+                Point::new(0, 4),
+                Point::new(0, 5)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_steep_line() {
+        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(2, 7)).collect();
+        // Verify line properties for steep slope
+        assert_eq!(line[0], Point::new(0, 0));
+        assert_eq!(line[line.len() - 1], Point::new(2, 7));
+        assert_eq!(line.len(), 8); // Start, end, and 6 points between
+    }
+
+    #[test]
+    fn test_single_point() {
+        let point = Point::new(2, 3);
+        let line: Vec<Point> = Bresenham::new(point, point).collect();
+        assert_eq!(line, vec![point]);
+    }
+
+    #[test]
+    fn test_negative_coordinates() {
+        let line: Vec<Point> = Bresenham::new(Point::new(-2, -3), Point::new(2, 3)).collect();
+        assert_eq!(line[0], Point::new(-2, -3));
+        assert_eq!(line[line.len() - 1], Point::new(2, 3));
+
+        // Test points are connected with no gaps
+        for i in 1..line.len() {
+            let current = line[i];
+            let previous = line[i - 1];
+            let distance =
+                ((current.x - previous.x).pow(2) + (current.y - previous.y).pow(2)) as f32;
+            assert!(
+                distance <= 2.0,
+                "Points should be adjacent: {:?} and {:?}",
+                previous,
+                current
+            );
+        }
+    }
+
+    #[test]
+    fn test_different_quadrants() {
+        // Test lines in different quadrants of the coordinate system
+        let quadrants = [
+            (Point::new(0, 0), Point::new(5, 5)),   // Q1
+            (Point::new(0, 0), Point::new(-5, 5)),  // Q2
+            (Point::new(0, 0), Point::new(-5, -5)), // Q3
+            (Point::new(0, 0), Point::new(5, -5)),  // Q4
+        ];
+
+        for (start, end) in quadrants.iter() {
+            let line: Vec<Point> = Bresenham::new(*start, *end).collect();
+            assert_eq!(line[0], *start);
+            assert_eq!(line[line.len() - 1], *end);
+
+            // Check connectivity
+            for i in 1..line.len() {
+                let a = line[i - 1];
+                let b = line[i];
+                let dx = (b.x - a.x).abs();
+                let dy = (b.y - a.y).abs();
+                assert!(dx <= 1 && dy <= 1, "Points should be adjacent");
+            }
+        }
+    }
+}

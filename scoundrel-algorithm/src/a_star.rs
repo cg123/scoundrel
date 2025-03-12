@@ -2,7 +2,7 @@ use crate::graph::LabeledSpatialGraph;
 use scoundrel_util::PQEntry;
 use std::collections::{BinaryHeap, HashMap};
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Passability {
     Passable,
     Impassable,
@@ -71,77 +71,18 @@ pub fn a_star<M: LabeledSpatialGraph<Passability>>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::graph::{BaseGraph, SpatialGraph};
-    use scoundrel_geometry::Vector2;
-    use scoundrel_util::NonNaN32;
-
-    // Mock implementation of a simple grid for testing
-    struct TestGrid {
-        width: i32,
-        height: i32,
-        walls: Vec<Vector2<i32>>,
-    }
-
-    impl TestGrid {
-        fn new(width: i32, height: i32, walls: Vec<Vector2<i32>>) -> Self {
-            Self {
-                width,
-                height,
-                walls,
-            }
-        }
-
-        fn in_bounds(&self, pos: Vector2<i32>) -> bool {
-            pos.x >= 0 && pos.x < self.width && pos.y >= 0 && pos.y < self.height
-        }
-    }
-
-    impl BaseGraph for TestGrid {
-        type NodeHandle = Vector2<i32>;
-
-        fn adjacent_nodes(&self, node: Self::NodeHandle) -> Vec<Self::NodeHandle> {
-            let dirs = [
-                Vector2::new(0, 1),  // up
-                Vector2::new(1, 0),  // right
-                Vector2::new(0, -1), // down
-                Vector2::new(-1, 0), // left
-            ];
-
-            dirs.iter()
-                .map(|dir| node + *dir)
-                .filter(|pos| self.in_bounds(*pos))
-                .collect()
-        }
-    }
-
-    impl crate::LabeledGraph<Passability> for TestGrid {
-        fn get(&self, node: Self::NodeHandle) -> Option<Passability> {
-            if !self.in_bounds(node) {
-                return None;
-            }
-
-            if self.walls.contains(&node) {
-                Some(Passability::Impassable)
-            } else {
-                Some(Passability::Passable)
-            }
-        }
-    }
-
-    impl SpatialGraph for TestGrid {
-        type Distance = NonNaN32;
-
-        fn distance(&self, from: Self::NodeHandle, to: Self::NodeHandle) -> Self::Distance {
-            let dx = (to.x - from.x) as f32;
-            let dy = (to.y - from.y) as f32;
-            NonNaN32::new((dx * dx + dy * dy).sqrt())
-        }
-    }
+    use scoundrel_geometry::{Grid2D, Vector2};
 
     #[test]
     fn test_a_star_direct_path() {
         // 5x5 grid with no walls
-        let grid = TestGrid::new(5, 5, vec![]);
+        let grid = Grid2D::from_sparse_points(
+            5,
+            5,
+            Passability::Passable,
+            vec![],
+            Passability::Impassable,
+        );
 
         let start = Vector2::new(0, 0);
         let end = Vector2::new(4, 4);
@@ -163,7 +104,8 @@ mod tests {
             Vector2::new(2, 2),
             Vector2::new(2, 3),
         ];
-        let grid = TestGrid::new(5, 5, walls);
+        let grid =
+            Grid2D::from_sparse_points(5, 5, Passability::Passable, walls, Passability::Impassable);
 
         let start = Vector2::new(0, 2);
         let end = Vector2::new(4, 2);
@@ -178,7 +120,7 @@ mod tests {
 
         // Check that the path avoids the wall
         for pos in &path {
-            assert!(!grid.walls.contains(pos));
+            assert!(grid.get(*pos) == Some(&Passability::Passable));
         }
     }
 
@@ -192,7 +134,8 @@ mod tests {
             Vector2::new(2, 3),
             Vector2::new(2, 4),
         ];
-        let grid = TestGrid::new(5, 5, walls);
+        let grid =
+            Grid2D::from_sparse_points(5, 5, Passability::Passable, walls, Passability::Impassable);
 
         let start = Vector2::new(0, 2);
         let end = Vector2::new(4, 2);

@@ -25,6 +25,20 @@ impl<T: Copy> Grid2D<T> {
         }
     }
 
+    pub fn from_sparse_points(
+        width: i32,
+        height: i32,
+        fill_val: T,
+        points: Vec<Point>,
+        point_val: T,
+    ) -> Grid2D<T> {
+        let mut grid = Grid2D::new(width, height, fill_val);
+        for pt in points {
+            grid.set(pt, point_val);
+        }
+        grid
+    }
+
     /// Creates a new grid with the same dimensions as another grid, filled with the given value.
     pub fn like<P: Copy>(other: &Grid2D<P>, fill: T) -> Grid2D<T> {
         Grid2D::new(other._width, other._height, fill)
