@@ -1,6 +1,8 @@
-use crate::Vector2;
-use scoundrel_util::numeric::{HasOne, HasZero};
 use std::ops::{Add, Div, Mul, Sub};
+
+use scoundrel_util::numeric::{HasOne, HasZero};
+
+use crate::Vector2;
 
 /// A `Mat2` is a 2x2 matrix with elements of type `T`.
 #[derive(Copy, Clone, Eq, PartialEq)]

@@ -1,12 +1,14 @@
-use crate::geometry::Point;
+use std::io;
+use std::time::Duration;
+
 use crossterm::{
     event,
     event::{Event, KeyEvent, KeyEventKind},
     terminal::enable_raw_mode,
 };
-use std::io;
-use std::time::Duration;
 use tui::{backend::CrosstermBackend, Frame, Terminal};
+
+use crate::geometry::Point;
 
 /// Manages the terminal UI state and keyboard input processing.
 ///

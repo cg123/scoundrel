@@ -143,8 +143,9 @@ impl<T: Copy> LabeledGraph<T> for Grid2D<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::collections::HashMap;
+
+    use super::*;
 
     // A simple graph implementation for testing
     struct TestGraph {
@@ -194,7 +195,11 @@ mod tests {
     impl SpatialGraph for TestGraph {
         type Distance = u32;
 
-        fn distance(&self, pt0: Self::NodeHandle, pt1: Self::NodeHandle) -> Self::Distance {
+        fn distance(
+            &self,
+            pt0: Self::NodeHandle,
+            pt1: Self::NodeHandle,
+        ) -> Self::Distance {
             // Simple implementation: just absolute difference for testing
             (pt0 as i64 - pt1 as i64).unsigned_abs() as u32
         }

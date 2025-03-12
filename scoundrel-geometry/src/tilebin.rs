@@ -1,6 +1,7 @@
-use crate::Point;
 use std::collections::HashMap;
 use std::hash::Hash;
+
+use crate::Point;
 
 /// A data structure that indexes values based on their position in a 2D grid.
 pub struct TileBin<T: Hash> {
@@ -85,8 +86,9 @@ impl<T: Hash + Eq + Clone> TileBin<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::collections::HashSet;
+
+    use super::*;
 
     #[test]
     fn test_insert() {

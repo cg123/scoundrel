@@ -1,10 +1,11 @@
+use std::hash::Hash;
+use std::ops::{Index, IndexMut};
+
 use paste::paste;
 use scoundrel_util::ignore_ident;
 use scoundrel_util::numeric::{HasSqrt, HasZero, Ring};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::hash::Hash;
-use std::ops::{Index, IndexMut};
 use thiserror::Error;
 #[cfg(feature = "tui")]
 use tui::layout::Position;
@@ -73,7 +74,9 @@ macro_rules! vector_inplace_op {
 ///
 /// This trait is implemented by all vector types in this module and provides
 /// common properties and conversions between vectors and tuples.
-pub trait VectorN<T>: From<Self::Tuple> + Into<Self::Tuple> + IntoIterator<Item = T> {
+pub trait VectorN<T>:
+    From<Self::Tuple> + Into<Self::Tuple> + IntoIterator<Item = T>
+{
     /// The tuple type corresponding to this vector type.
     type Tuple;
 

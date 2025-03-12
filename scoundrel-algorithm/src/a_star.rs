@@ -1,6 +1,8 @@
-use crate::graph::LabeledSpatialGraph;
-use scoundrel_util::MinHeapEntry;
 use std::collections::{BinaryHeap, HashMap};
+
+use scoundrel_util::MinHeapEntry;
+
+use crate::graph::LabeledSpatialGraph;
 
 /// Represents whether a tile or node can be traversed during pathfinding.
 ///
@@ -45,8 +47,8 @@ pub fn a_star<M: LabeledSpatialGraph<Passability>>(
 
         for candidate in map.adjacent_nodes(current) {
             if let Some(Passability::Passable) = map.get(candidate) {
-                let new_cost =
-                    *running_cost.get(&current).unwrap() + map.distance(current, candidate);
+                let new_cost = *running_cost.get(&current).unwrap()
+                    + map.distance(current, candidate);
                 if !running_cost.contains_key(&candidate)
                     || *running_cost.get(&candidate).unwrap() > new_cost
                 {
@@ -76,8 +78,9 @@ pub fn a_star<M: LabeledSpatialGraph<Passability>>(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use scoundrel_geometry::{Grid2D, Vector2};
+
+    use super::*;
 
     #[test]
     fn test_a_star_direct_path() {
@@ -110,8 +113,13 @@ mod tests {
             Vector2::new(2, 2),
             Vector2::new(2, 3),
         ];
-        let grid =
-            Grid2D::from_sparse_points(5, 5, Passability::Passable, walls, Passability::Impassable);
+        let grid = Grid2D::from_sparse_points(
+            5,
+            5,
+            Passability::Passable,
+            walls,
+            Passability::Impassable,
+        );
 
         let start = Vector2::new(0, 2);
         let end = Vector2::new(4, 2);
@@ -140,8 +148,13 @@ mod tests {
             Vector2::new(2, 3),
             Vector2::new(2, 4),
         ];
-        let grid =
-            Grid2D::from_sparse_points(5, 5, Passability::Passable, walls, Passability::Impassable);
+        let grid = Grid2D::from_sparse_points(
+            5,
+            5,
+            Passability::Passable,
+            walls,
+            Passability::Impassable,
+        );
 
         let start = Vector2::new(0, 2);
         let end = Vector2::new(4, 2);

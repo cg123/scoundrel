@@ -1,6 +1,8 @@
-use super::graph::LabeledSpatialGraph;
-use scoundrel_geometry::*;
 use std::cmp::Ordering;
+
+use scoundrel_geometry::*;
+
+use super::graph::LabeledSpatialGraph;
 
 /// Represents whether a tile or object blocks light for field of view calculations.
 ///
@@ -86,12 +88,6 @@ pub trait TileShape {
 
     /// Calculate the previous tile's low slope for transitions
     fn prev_tile_slope_low(&self, x: i32, y: i32) -> Slope;
-
-    /// Determine if a point is within the given range
-    fn is_in_range(&self, x: i32, y: i32, range: i32) -> bool {
-        // Default implementation for circular FOV
-        x * x + y * y <= range * range
-    }
 }
 
 /// Standard square tile shape used in basic shadowcasting
@@ -135,7 +131,9 @@ pub struct AdamMilazzoTileShape<'a, M: LabeledSpatialGraph<Opacity, NodeHandle =
     transform: Mat2<i32>,
 }
 
-impl<'a, M: LabeledSpatialGraph<Opacity, NodeHandle = Point>> AdamMilazzoTileShape<'a, M> {
+impl<'a, M: LabeledSpatialGraph<Opacity, NodeHandle = Point>>
+    AdamMilazzoTileShape<'a, M>
+{
     pub fn new(map: &'a M, origin: Point, transform: Mat2<i32>) -> Self {
         Self {
             map,
@@ -233,11 +231,6 @@ impl<'a, M: LabeledSpatialGraph<Opacity, NodeHandle = Point>> TileShape
             return Slope::new(2 * y, 2 * x + 1);
         }
     }
-
-    fn is_in_range(&self, y: i32, x: i32, range: i32) -> bool {
-        // Calculate distance from origin to (y,x) - standard circular FOV
-        y * y + x * x <= range * range
-    }
 }
 
 // Keep the original BeveledTileShape as an alias for AdamMilazzoTileShape
@@ -281,7 +274,7 @@ fn _cast_light<M, F, T>(
             break;
         }
 
-        let in_range = tile_shape.is_in_range(y, x, range);
+        let in_range = x * x + y * y <= range * range;
         let map_pt = origin + transform * Point::new(y, x);
         let opaque = map.get(map_pt) != Some(Opacity::Transparent);
         if in_range {
@@ -334,7 +327,10 @@ fn _cast_light<M, F, T>(
 ///
 /// * `M` - The type of the map.
 /// * `F` - The type of the callback function.
-pub fn cast_light_2d<M: LabeledSpatialGraph<Opacity, NodeHandle = Point>, F: FnMut(Point)>(
+pub fn cast_light_2d<
+    M: LabeledSpatialGraph<Opacity, NodeHandle = Point>,
+    F: FnMut(Point),
+>(
     map: &M,
     origin: Point,
     range: i32,
@@ -435,8 +431,9 @@ pub fn cast_light_2d_beveled<
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::collections::HashSet;
+
+    use super::*;
 
     #[test]
     fn test_octant_transform() {
@@ -544,7 +541,13 @@ mod tests {
         let walls = vec![
             Point::new(5, 7), // Wall above origin
         ];
-        let map = Grid2D::from_sparse_points(10, 10, Opacity::Transparent, walls, Opacity::Opaque);
+        let map = Grid2D::from_sparse_points(
+            10,
+            10,
+            Opacity::Transparent,
+            walls,
+            Opacity::Opaque,
+        );
         let origin = Point::new(5, 5);
         let range = 5;
 
@@ -586,7 +589,13 @@ mod tests {
             Point::new(2, 1),
             Point::new(4, 3),
         ];
-        let map = Grid2D::from_sparse_points(8, 5, Opacity::Transparent, walls, Opacity::Opaque);
+        let map = Grid2D::from_sparse_points(
+            8,
+            5,
+            Opacity::Transparent,
+            walls,
+            Opacity::Opaque,
+        );
         let origin = Point::new(0, 1);
         let range = 100;
 
@@ -674,7 +683,13 @@ mod tests {
             Point::new(4, 4),
             Point::new(5, 5),
         ];
-        let map = Grid2D::from_sparse_points(6, 6, Opacity::Transparent, walls, Opacity::Opaque);
+        let map = Grid2D::from_sparse_points(
+            6,
+            6,
+            Opacity::Transparent,
+            walls,
+            Opacity::Opaque,
+        );
         let origin = Point::new(0, 5);
         let opposite_corner = Point::new(5, 0);
         let test_point = Point::new(5, 2);
@@ -713,11 +728,13 @@ mod tests {
             "Square algorithm should not see test point"
         );
         assert!(
-            diamond_visible.contains(&opposite_corner) && diamond_visible.contains(&test_point),
+            diamond_visible.contains(&opposite_corner)
+                && diamond_visible.contains(&test_point),
             "Diamond algorithm should see opposite corner and test point"
         );
         assert!(
-            beveled_visible.contains(&opposite_corner) && !beveled_visible.contains(&test_point),
+            beveled_visible.contains(&opposite_corner)
+                && !beveled_visible.contains(&test_point),
             "Beveled algorithm should see opposite corner but not test point"
         );
     }

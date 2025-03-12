@@ -154,7 +154,11 @@ impl<T> Node<T> {
 ///
 /// // Use the tree for spatial queries
 /// ```
-pub fn build_quadtree<T>(items: Vec<(T, Point)>, bounds: Rect, max_depth: usize) -> Node<T> {
+pub fn build_quadtree<T>(
+    items: Vec<(T, Point)>,
+    bounds: Rect,
+    max_depth: usize,
+) -> Node<T> {
     if items.len() <= 1 || max_depth == 0 {
         return Node {
             bounds,
@@ -191,7 +195,10 @@ mod tests {
     fn test_node_nearest() {
         let node = Node {
             bounds: Rect::with_points(Point::new(-5, -5), Point::new(5, 5)),
-            payload: NodePayload::Contents(vec![(0, Point::new(-3, -3)), (1, Point::new(3, 3))]),
+            payload: NodePayload::Contents(vec![
+                (0, Point::new(-3, -3)),
+                (1, Point::new(3, 3)),
+            ]),
         };
 
         // Test nearest to a point that is closer to the point at (-3, -3)
@@ -207,14 +214,19 @@ mod tests {
         // Test nearest to a point that is equidistant to both points
         let query3 = Point::new(0, 0);
         let nearest3 = node.nearest(query3, None).unwrap().1;
-        assert!(nearest3 == &(0, Point::new(-3, -3)) || nearest3 == &(1, Point::new(3, 3)));
+        assert!(
+            nearest3 == &(0, Point::new(-3, -3)) || nearest3 == &(1, Point::new(3, 3))
+        );
     }
 
     #[test]
     fn test_node_query_rect() {
         let node = Node {
             bounds: Rect::with_points(Point::new(0, 0), Point::new(100, 100)),
-            payload: NodePayload::Contents(vec![(0, Point::new(50, 50)), (1, Point::new(25, 25))]),
+            payload: NodePayload::Contents(vec![
+                (0, Point::new(50, 50)),
+                (1, Point::new(25, 25)),
+            ]),
         };
 
         let mut results = Vec::new();
@@ -240,7 +252,10 @@ mod tests {
     fn test_node_query_rect_empty() {
         let node = Node {
             bounds: Rect::with_points(Point::new(0, 0), Point::new(100, 100)),
-            payload: NodePayload::Contents(vec![(0, Point::new(50, 50)), (1, Point::new(25, 25))]),
+            payload: NodePayload::Contents(vec![
+                (0, Point::new(50, 50)),
+                (1, Point::new(25, 25)),
+            ]),
         };
 
         let mut results = Vec::new();
@@ -465,7 +480,10 @@ mod tests {
         // Test nearest when a best candidate is already provided
         let node = Node {
             bounds: Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
-            payload: NodePayload::Contents(vec![(1, Point::new(5, 4)), (2, Point::new(7, 7))]),
+            payload: NodePayload::Contents(vec![
+                (1, Point::new(5, 4)),
+                (2, Point::new(7, 7)),
+            ]),
         };
 
         // Query point is at (6,6)
@@ -486,7 +504,10 @@ mod tests {
         // Test with query point outside the bounds
         let node = Node {
             bounds: Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
-            payload: NodePayload::Contents(vec![(1, Point::new(1, 1)), (2, Point::new(9, 9))]),
+            payload: NodePayload::Contents(vec![
+                (1, Point::new(1, 1)),
+                (2, Point::new(9, 9)),
+            ]),
         };
 
         // Query point outside bounds

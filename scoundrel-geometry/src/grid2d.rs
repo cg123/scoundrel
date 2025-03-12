@@ -1,7 +1,8 @@
-use crate::{MooreNeighbor, Point, Rect, Vector2};
 use scoundrel_util::numeric::HasSqrt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+use crate::{MooreNeighbor, Point, Rect, Vector2};
 
 /// A 2D grid data structure.
 ///
@@ -81,7 +82,11 @@ impl<T> Grid2D<T> {
     /// Creates a new grid from an iterator.
     ///
     /// The iterator should yield exactly `width * height` elements. If it yields more or less, this method will panic.
-    pub fn from_iter<I: Iterator<Item = T>>(iter: I, width: i32, height: i32) -> Grid2D<T> {
+    pub fn from_iter<I: Iterator<Item = T>>(
+        iter: I,
+        width: i32,
+        height: i32,
+    ) -> Grid2D<T> {
         let data = iter.collect::<Vec<_>>();
         assert_eq!(
             data.len(),
@@ -272,7 +277,11 @@ impl<
 }
 
 impl<
-        T: Copy + HasSqrt + std::ops::Sub<Output = T> + std::ops::Div<Output = Tp> + From<i8>,
+        T: Copy
+            + HasSqrt
+            + std::ops::Sub<Output = T>
+            + std::ops::Div<Output = Tp>
+            + From<i8>,
         Tp: Copy + From<i8>,
     > Grid2D<T>
 {

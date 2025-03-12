@@ -1,6 +1,7 @@
+use std::collections::{HashMap, HashSet};
+
 use scoundrel_algorithm::{cast_light_2d, Opacity};
 use scoundrel_geometry::{Grid2D, Point};
-use std::collections::{HashMap, HashSet};
 
 fn _compute_fov(map: &Grid2D<Opacity>, origin: Point, radius: i32) -> HashSet<Point> {
     let mut visible = HashSet::new();
@@ -66,7 +67,8 @@ fn test_fov_walls_block_vision() {
         Point::new(7, 5),
     ];
 
-    let map = Grid2D::from_sparse_points(11, 11, Opacity::Transparent, walls, Opacity::Opaque);
+    let map =
+        Grid2D::from_sparse_points(11, 11, Opacity::Transparent, walls, Opacity::Opaque);
     let origin = Point::new(5, 0); // Looking down the corridor
     let radius = 10;
 
@@ -186,7 +188,8 @@ fn test_fov_complex_scenario() {
         Point::new(11, 4),
     ];
 
-    let map = Grid2D::from_sparse_points(18, 10, Opacity::Transparent, walls, Opacity::Opaque);
+    let map =
+        Grid2D::from_sparse_points(18, 10, Opacity::Transparent, walls, Opacity::Opaque);
 
     // Test visibility from room 1
     let origin_room1 = Point::new(4, 4);

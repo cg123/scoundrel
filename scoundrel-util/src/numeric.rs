@@ -1,4 +1,5 @@
 use std::{cmp::Ordering, ops::Add};
+
 use thiserror::Error;
 
 /// A trait representing a numeric type with a value equivalent to zero.
@@ -43,7 +44,10 @@ pub trait Ring:
     std::ops::Add<Self, Output = Self> + std::ops::Mul<Self, Output = Self> + Sized
 {
 }
-impl<T> Ring for T where T: std::ops::Add<Self, Output = Self> + std::ops::Mul<Self, Output = Self> {}
+impl<T> Ring for T where
+    T: std::ops::Add<Self, Output = Self> + std::ops::Mul<Self, Output = Self>
+{
+}
 
 /// A trait for types that have a square root function.
 pub trait HasSqrt {
@@ -136,8 +140,9 @@ impl Ord for NonNaN32 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::ops::Mul;
+
+    use super::*;
 
     #[test]
     fn test_has_zero_integers() {

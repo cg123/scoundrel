@@ -156,8 +156,9 @@ mod tests {
     // Test serde if the feature is enabled
     #[cfg(feature = "serde_json")]
     mod serde_tests {
-        use super::*;
         use serde_json;
+
+        use super::*;
 
         #[test]
         fn test_serialize() {

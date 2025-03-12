@@ -47,8 +47,9 @@ impl<T, P: Ord> Ord for MinHeapEntry<T, P> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::collections::BinaryHeap;
+
+    use super::*;
 
     #[test]
     fn test_construction() {

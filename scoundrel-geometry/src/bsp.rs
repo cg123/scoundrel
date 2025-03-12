@@ -1,6 +1,7 @@
-use crate::*;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
+
+use crate::*;
 
 /// A reference-counted handle to a BSP tree node.
 ///
@@ -177,9 +178,12 @@ impl<T: Copy> Tree<T> {
             return false;
         }
 
-        let (above, below) =
-            Self::create_children(&handle, &bounds, half_space, contents, &old_edges, &mut f);
-        Self::update_neighbor_edges(&above, &below, &bounds, half_space, old_edges, &handle);
+        let (above, below) = Self::create_children(
+            &handle, &bounds, half_space, contents, &old_edges, &mut f,
+        );
+        Self::update_neighbor_edges(
+            &above, &below, &bounds, half_space, old_edges, &handle,
+        );
         handle.borrow_mut().children = Some([above, below]);
         true
     }
@@ -248,7 +252,8 @@ impl<T: Copy> Tree<T> {
                                 neighbor: Rc::downgrade(above),
                             })
                         }
-                        if let Some(edge_below) = half_space.opposite().clip_line(ep.line) {
+                        if let Some(edge_below) = half_space.opposite().clip_line(ep.line)
+                        {
                             neighbor.edges.push(HalfEdge {
                                 line: edge_below,
                                 neighbor: Rc::downgrade(below),
@@ -560,11 +565,12 @@ mod tests {
         };
 
         let root_clone = tree.root.clone();
-        let split_result = tree.split(root_clone, half_space, |parent_content, bounds| {
-            // Generate content based on parent content and area of new bounds
-            let area = (bounds.max.x - bounds.min.x) * (bounds.max.y - bounds.min.y);
-            parent_content + (area as u32)
-        });
+        let split_result =
+            tree.split(root_clone, half_space, |parent_content, bounds| {
+                // Generate content based on parent content and area of new bounds
+                let area = (bounds.max.x - bounds.min.x) * (bounds.max.y - bounds.min.y);
+                parent_content + (area as u32)
+            });
 
         assert!(split_result);
         let root_node = tree.root.borrow();

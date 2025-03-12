@@ -113,7 +113,8 @@ fn test_bresenham_special_cases() {
     );
 
     // Orthogonal lines - horizontal
-    let horiz_line: Vec<Point> = Bresenham::new(Point::new(3, 5), Point::new(8, 5)).collect();
+    let horiz_line: Vec<Point> =
+        Bresenham::new(Point::new(3, 5), Point::new(8, 5)).collect();
     assert_eq!(
         horiz_line.len(),
         6,
@@ -124,7 +125,8 @@ fn test_bresenham_special_cases() {
     }
 
     // Orthogonal lines - vertical
-    let vert_line: Vec<Point> = Bresenham::new(Point::new(3, 5), Point::new(3, 10)).collect();
+    let vert_line: Vec<Point> =
+        Bresenham::new(Point::new(3, 5), Point::new(3, 10)).collect();
     assert_eq!(
         vert_line.len(),
         6,
@@ -140,7 +142,8 @@ fn test_bresenham_line_properties() {
     // Test the mathematical properties expected of Bresenham lines
 
     // 45-degree diagonal should contain exactly the same number of x and y steps
-    let diagonal: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(10, 10)).collect();
+    let diagonal: Vec<Point> =
+        Bresenham::new(Point::new(0, 0), Point::new(10, 10)).collect();
     assert_eq!(diagonal.len(), 11, "Diagonal should have correct length");
 
     // Each step should increment both x and y by 1
@@ -158,7 +161,8 @@ fn test_bresenham_line_properties() {
     }
 
     // For a 2:1 slope, we should see 2 y steps for every x step
-    let steep_line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(5, 10)).collect();
+    let steep_line: Vec<Point> =
+        Bresenham::new(Point::new(0, 0), Point::new(5, 10)).collect();
 
     // Count total y steps
     let mut y_steps = 0;

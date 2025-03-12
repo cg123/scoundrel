@@ -76,7 +76,8 @@ mod tests {
 
     #[test]
     fn test_line_basic() {
-        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(3, 2)).collect();
+        let line: Vec<Point> =
+            Bresenham::new(Point::new(0, 0), Point::new(3, 2)).collect();
         assert_eq!(
             line,
             vec![
@@ -90,7 +91,8 @@ mod tests {
 
     #[test]
     fn test_line_reverse() {
-        let line: Vec<Point> = Bresenham::new(Point::new(3, 2), Point::new(0, 0)).collect();
+        let line: Vec<Point> =
+            Bresenham::new(Point::new(3, 2), Point::new(0, 0)).collect();
         assert_eq!(
             line,
             vec![
@@ -104,7 +106,8 @@ mod tests {
 
     #[test]
     fn test_horizontal_line() {
-        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(5, 0)).collect();
+        let line: Vec<Point> =
+            Bresenham::new(Point::new(0, 0), Point::new(5, 0)).collect();
         assert_eq!(
             line,
             vec![
@@ -120,7 +123,8 @@ mod tests {
 
     #[test]
     fn test_vertical_line() {
-        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(0, 5)).collect();
+        let line: Vec<Point> =
+            Bresenham::new(Point::new(0, 0), Point::new(0, 5)).collect();
         assert_eq!(
             line,
             vec![
@@ -136,7 +140,8 @@ mod tests {
 
     #[test]
     fn test_steep_line() {
-        let line: Vec<Point> = Bresenham::new(Point::new(0, 0), Point::new(2, 7)).collect();
+        let line: Vec<Point> =
+            Bresenham::new(Point::new(0, 0), Point::new(2, 7)).collect();
         // Verify line properties for steep slope
         assert_eq!(line[0], Point::new(0, 0));
         assert_eq!(line[line.len() - 1], Point::new(2, 7));
@@ -152,7 +157,8 @@ mod tests {
 
     #[test]
     fn test_negative_coordinates() {
-        let line: Vec<Point> = Bresenham::new(Point::new(-2, -3), Point::new(2, 3)).collect();
+        let line: Vec<Point> =
+            Bresenham::new(Point::new(-2, -3), Point::new(2, 3)).collect();
         assert_eq!(line[0], Point::new(-2, -3));
         assert_eq!(line[line.len() - 1], Point::new(2, 3));
 
@@ -160,8 +166,8 @@ mod tests {
         for i in 1..line.len() {
             let current = line[i];
             let previous = line[i - 1];
-            let distance =
-                ((current.x - previous.x).pow(2) + (current.y - previous.y).pow(2)) as f32;
+            let distance = ((current.x - previous.x).pow(2)
+                + (current.y - previous.y).pow(2)) as f32;
             assert!(
                 distance <= 2.0,
                 "Points should be adjacent: {:?} and {:?}",

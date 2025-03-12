@@ -1,7 +1,11 @@
 use scoundrel_algorithm::{a_star, Passability};
 use scoundrel_geometry::{Grid2D, Point, Vector2};
 
-fn _make_path_grid(width: i32, height: i32, walls: Vec<Vector2<i32>>) -> Grid2D<Passability> {
+fn _make_path_grid(
+    width: i32,
+    height: i32,
+    walls: Vec<Vector2<i32>>,
+) -> Grid2D<Passability> {
     // Create a grid filled with passable cells
     let mut grid = Grid2D::new(width, height, Passability::Passable);
 
