@@ -457,4 +457,69 @@ mod tests {
         assert_eq!(vec.z, vec[Axis4D::Z]);
         assert_eq!(vec.w, vec[Axis4D::W]);
     }
+
+    #[test]
+    fn test_axis_mut_indexing() {
+        let mut vec = Vector4::new(1, 2, 3, 4);
+        vec[Axis4D::X] = 5;
+        vec[Axis4D::Y] = 6;
+        vec[Axis4D::Z] = 7;
+        vec[Axis4D::W] = 8;
+        assert_eq!(vec.x, 5);
+        assert_eq!(vec.y, 6);
+        assert_eq!(vec.z, 7);
+        assert_eq!(vec.w, 8);
+    }
+
+    #[test]
+    fn test_axis_creation() {
+        let vec = Vector4::along_axis(Axis4D::X, 7);
+        assert_eq!(vec.x, 7);
+        assert_eq!(vec.y, 0);
+        assert_eq!(vec.z, 0);
+        assert_eq!(vec.w, 0);
+
+        let vec = Vector4::along_axis(Axis4D::Y, 7);
+        assert_eq!(vec.x, 0);
+        assert_eq!(vec.y, 7);
+        assert_eq!(vec.z, 0);
+        assert_eq!(vec.w, 0);
+
+        let vec = Vector4::along_axis(Axis4D::Z, 7);
+        assert_eq!(vec.x, 0);
+        assert_eq!(vec.y, 0);
+        assert_eq!(vec.z, 7);
+        assert_eq!(vec.w, 0);
+
+        let vec = Vector4::along_axis(Axis4D::W, 7);
+        assert_eq!(vec.x, 0);
+        assert_eq!(vec.y, 0);
+        assert_eq!(vec.z, 0);
+        assert_eq!(vec.w, 7);
+    }
+
+    #[test]
+    fn test_axis_conversion() {
+        let axis2d = Axis2D::X;
+        let axis3d: Axis3D = axis2d.into();
+        assert_eq!(axis3d, Axis3D::X);
+        let axis4d: Axis4D = axis2d.into();
+        assert_eq!(axis4d, Axis4D::X);
+
+        let axis3d = Axis3D::Y;
+        let axis2d: Result<Axis2D, _> = axis3d.try_into();
+        assert_eq!(axis2d.unwrap(), Axis2D::Y);
+        let axis4d: Axis4D = axis3d.into();
+        assert_eq!(axis4d, Axis4D::Y);
+
+        let axis4d = Axis4D::Z;
+        let axis2d: Result<Axis2D, _> = axis4d.try_into();
+        match axis2d {
+            Ok(_) => panic!("Expected error"),
+            Err(AxisError::InvalidAxis4D(axis)) => assert_eq!(axis, Axis4D::Z),
+            Err(_) => panic!("Unexpected error - expected InvalidAxis4D(Axis4D::Z)"),
+        }
+        let axis3d: Result<Axis3D, _> = axis4d.try_into();
+        assert_eq!(axis3d.unwrap(), Axis3D::Z);
+    }
 }
