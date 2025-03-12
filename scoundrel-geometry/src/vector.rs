@@ -69,8 +69,15 @@ macro_rules! vector_inplace_op {
     };
 }
 
+/// A trait representing an N-dimensional vector with components of type `T`.
+///
+/// This trait is implemented by all vector types in this module and provides
+/// common properties and conversions between vectors and tuples.
 pub trait VectorN<T>: From<Self::Tuple> + Into<Self::Tuple> + IntoIterator<Item = T> {
+    /// The tuple type corresponding to this vector type.
     type Tuple;
+
+    /// The dimensionality of the vector.
     const LENGTH: usize;
 }
 
@@ -190,9 +197,29 @@ macro_rules! define_vector {
     };
 }
 
-define_vector!(Vector2 { x, y });
-define_vector!(Vector3 { x, y, z });
-define_vector!(Vector4 { x, y, z, w });
+define_vector!(
+    /// A 2D vector with x and y components.
+    ///
+    /// Vector2 provides basic operations for 2D vector mathematics including addition,
+    /// subtraction, scalar multiplication, dot products, and normalization.
+    Vector2 { x, y }
+);
+
+define_vector!(
+    /// A 3D vector with x, y, and z components.
+    ///
+    /// Vector3 provides basic operations for 3D vector mathematics including addition,
+    /// subtraction, scalar multiplication, dot products, cross products, and normalization.
+    Vector3 { x, y, z }
+);
+
+define_vector!(
+    /// A 4D vector with x, y, z, and w components.
+    ///
+    /// Vector4 provides basic operations for 4D vector mathematics including addition,
+    /// subtraction, scalar multiplication, dot products, and normalization.
+    Vector4 { x, y, z, w }
+);
 
 impl<T> Vector3<T> {
     pub fn from_vector2(vec: Vector2<T>, z: T) -> Self {
@@ -227,7 +254,8 @@ impl<T: Ring + std::ops::Sub<Output = T> + Copy> Vector3<T> {
 }
 
 macro_rules! define_axes {
-    ($name:ident {$($case:ident),+}, $vector:ident) => {
+    ($(#[$outer:meta])* $name:ident {$($case:ident),+}, $vector:ident) => {
+        $(#[$outer])*
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         pub enum $name {
             $(
@@ -270,16 +298,44 @@ macro_rules! define_axes {
         }
     };
 }
-define_axes!(Axis2D { X, Y }, Vector2);
-define_axes!(Axis3D { X, Y, Z }, Vector3);
-define_axes!(Axis4D { X, Y, Z, W }, Vector4);
 
+define_axes!(
+    /// Represents the axes of a 2D coordinate system (X and Y).
+    ///
+    /// Used for axis-specific operations and indexing on 2D vectors.
+    Axis2D { X, Y }, Vector2
+);
+
+define_axes!(
+    /// Represents the axes of a 3D coordinate system (X, Y, and Z).
+    ///
+    /// Used for axis-specific operations and indexing on 3D vectors.
+    Axis3D { X, Y, Z }, Vector3
+);
+
+define_axes!(
+    /// Represents the axes of a 4D coordinate system (X, Y, Z, and W).
+    ///
+    /// Used for axis-specific operations and indexing on 4D vectors.
+    Axis4D { X, Y, Z, W }, Vector4
+);
+
+/// Errors that can occur during axis conversion operations.
+///
+/// This enum represents the possible errors when attempting to convert between
+/// axis types of different dimensions (for example, trying to convert a Z axis
+/// to a 2D axis system, which doesn't have a Z component).
 #[derive(Error, Debug)]
 pub enum AxisError {
+    /// Error when an Axis2D value cannot be used in the current context.
     #[error("The specified Axis2D value is not valid for this operation.")]
     InvalidAxis2D(Axis2D),
+
+    /// Error when an Axis3D value cannot be used in the current context.
     #[error("The specified Axis3D value is not valid for this operation.")]
     InvalidAxis3D(Axis3D),
+
+    /// Error when an Axis4D value cannot be used in the current context.
     #[error("The specified Axis4D value is not valid for this operation.")]
     InvalidAxis4D(Axis4D),
 }

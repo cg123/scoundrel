@@ -2,9 +2,15 @@ use crate::graph::LabeledSpatialGraph;
 use scoundrel_util::MinHeapEntry;
 use std::collections::{BinaryHeap, HashMap};
 
+/// Represents whether a tile or node can be traversed during pathfinding.
+///
+/// This enum is used by the A* algorithm to determine if a node can be
+/// included in the path being calculated.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Passability {
+    /// The tile or node can be traversed.
     Passable,
+    /// The tile or node cannot be traversed (e.g., a wall or obstacle).
     Impassable,
 }
 

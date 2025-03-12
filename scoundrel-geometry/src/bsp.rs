@@ -2,16 +2,52 @@ use crate::*;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
+/// A reference-counted handle to a BSP tree node.
+///
+/// This type provides shared ownership of a node with interior mutability
+/// through RefCell, allowing the tree structure to be modified while
+/// maintaining parent-child relationships.
 pub type NodeHandle<T> = Rc<RefCell<Node<T>>>;
+
+/// A weak reference to a BSP tree node.
+///
+/// Used to prevent reference cycles between parent and child nodes, or
+/// between neighboring nodes in the BSP tree.
 pub type NodeWeakHandle<T> = Weak<RefCell<Node<T>>>;
+
+/// A half-space with integer coordinates.
+///
+/// This is a type alias for `AxialHalfSpace<i32>`, representing a plane
+/// that divides space into two regions, used for BSP tree partitioning.
 pub type HalfSpace = AxialHalfSpace<i32>;
 
+/// Represents an edge between two adjacent nodes in a BSP tree.
+///
+/// A HalfEdge contains a line segment that forms part of the boundary between
+/// two nodes, along with a reference to the neighboring node. The term "half" indicates
+/// that each boundary between two nodes is represented by two separate edge objects,
+/// one in each node pointing to the other.
 #[derive(Clone)]
 pub struct HalfEdge<T> {
+    /// The line segment that forms this edge.
     pub line: OrthoLine,
+
+    /// A weak reference to the neighboring node connected by this edge.
     pub neighbor: NodeWeakHandle<T>,
 }
 impl<T> HalfEdge<T> {
+    /// Splits this edge along the given half-space.
+    ///
+    /// When a node is split by a half-space, its edges may also need to be split
+    /// if they cross the dividing plane. This method creates a new edge that
+    /// represents the portion of this edge that lies within the given half-space.
+    ///
+    /// # Arguments
+    /// * `half_space` - The half-space to split this edge along
+    ///
+    /// # Returns
+    /// * `Some(HalfEdge)` if the edge intersects with the half-space
+    /// * `None` if the edge does not intersect with the half-space
     pub fn split(&self, half_space: HalfSpace) -> Option<HalfEdge<T>> {
         half_space.clip_line(self.line).map(|new_line| HalfEdge {
             line: new_line,
@@ -20,12 +56,25 @@ impl<T> HalfEdge<T> {
     }
 }
 
+/// A node in a binary space partitioning tree.
+///
+/// Each node represents a rectangular region of space that may be subdivided into
+/// two child nodes. Nodes maintain connections to their parent, children, and
+/// neighboring nodes through edges. Each node also contains a payload of type `T`.
 pub struct Node<T> {
+    /// The rectangular bounds of this node.
     pub bounds: Rect,
+
+    /// A weak reference to the parent node, if any.
     pub parent: Option<NodeWeakHandle<T>>,
+
+    /// References to the two child nodes, if this node has been split.
     pub children: Option<[NodeHandle<T>; 2]>,
+
+    /// Edges connecting this node to adjacent nodes in the BSP tree.
     pub edges: Vec<HalfEdge<T>>,
 
+    /// The payload data associated with this node.
     pub contents: T,
 }
 
@@ -42,12 +91,31 @@ impl<T> Node<T> {
     }
 
     /// Sets the parent of the node and returns the updated node.
+    ///
+    /// This method is primarily used during tree construction to establish
+    /// parent-child relationships between nodes.
+    ///
+    /// # Arguments
+    /// * `parent` - A weak reference to the parent node
+    ///
+    /// # Returns
+    /// The updated node with the parent reference set
     pub fn with_parent(mut self, parent: NodeWeakHandle<T>) -> Self {
         self.parent = Some(parent);
         self
     }
 
     /// Sets the edges of the node and returns the updated node.
+    ///
+    /// This method is used during tree construction to establish connections
+    /// between adjacent nodes. The edges define the boundaries shared with
+    /// neighboring nodes.
+    ///
+    /// # Arguments
+    /// * `edges` - An iterable of HalfEdge objects to set as this node's edges
+    ///
+    /// # Returns
+    /// The updated node with the edges set
     pub fn with_edges<I: IntoIterator<Item = HalfEdge<T>>>(mut self, edges: I) -> Self {
         self.edges = edges.into_iter().collect();
         self
@@ -60,15 +128,41 @@ pub struct Tree<T: Copy> {
 }
 
 impl<T: Copy> Tree<T> {
-    /// Constructs a new Tree with the specified bounds and root node payload.
+    /// Constructs a new BSP Tree with the specified bounds and root node payload.
+    ///
+    /// Creates a single root node with the given bounds and contents.
+    /// The tree can then be subdivided by calling the `split` method.
+    ///
+    /// # Arguments
+    /// * `bounds` - The rectangular bounds of the entire space represented by the tree
+    /// * `root_contents` - The data payload to store in the root node
+    ///
+    /// # Returns
+    /// A new BSP Tree with a single root node
     pub fn new(bounds: Rect, root_contents: T) -> Self {
         Self {
             root: Rc::new(RefCell::new(Node::new(bounds, root_contents))),
         }
     }
 
-    /// Splits the tree along the specified half-space, updating the tree structure
-    /// and invoking the provided function `f` to generate new contents for the child nodes.
+    /// Splits a node in the tree along the specified half-space.
+    ///
+    /// This method divides the specified node into two child nodes along the given
+    /// half-space boundary. It updates all relevant tree structures including:
+    /// - Creating two new child nodes
+    /// - Updating their bounds based on the half-space
+    /// - Establishing parent-child relationships
+    /// - Creating and updating edges between nodes
+    /// - Setting contents for the new nodes using the provided function
+    ///
+    /// # Arguments
+    /// * `handle` - Reference to the node to split
+    /// * `half_space` - The half-space to split the node along
+    /// * `f` - A function that generates contents for the new child nodes
+    ///
+    /// # Returns
+    /// `true` if the split was successful, `false` if the half-space doesn't
+    /// intersect the node's bounds (meaning no split is possible)
     pub fn split<F: FnMut(&T, Rect) -> T>(
         &mut self,
         handle: NodeHandle<T>,

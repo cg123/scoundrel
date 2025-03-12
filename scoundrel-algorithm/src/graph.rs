@@ -83,6 +83,15 @@ pub trait SpatialGraph: BaseGraph {
 }
 
 /// A `SpatialGraph` with an associated labeling, mapping each node to a value of type `T`.
+///
+/// This trait combines the functionality of both `SpatialGraph` and `LabeledGraph<T>`,
+/// providing a complete interface for graphs that have both spatial relationships
+/// and node labels. It is used extensively in algorithms like A* pathfinding and
+/// field of view calculations where both spatial properties and node attributes
+/// (like passability or opacity) are important.
+///
+/// Types implementing this trait can represent game maps, grid-based environments,
+/// or any other data structure where nodes have both positions and properties.
 pub trait LabeledSpatialGraph<T: Copy>: SpatialGraph + LabeledGraph<T> {}
 impl<T, G> LabeledSpatialGraph<T> for G
 where

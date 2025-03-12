@@ -25,6 +25,22 @@ impl<T: Copy> Grid2D<T> {
         }
     }
 
+    /// Creates a grid from a list of specific points with a different value.
+    ///
+    /// This method creates a grid of the specified dimensions, fills it with
+    /// `fill_val`, and then sets the value at each point in `points` to
+    /// `point_val`. This is useful for creating maps with sparse features,
+    /// such as placing walls or objects at specific positions.
+    ///
+    /// # Arguments
+    /// * `width` - The width of the grid
+    /// * `height` - The height of the grid
+    /// * `fill_val` - The default value for all cells
+    /// * `points` - Vector of specific points that should have a different value
+    /// * `point_val` - The value to set at each point in the `points` vector
+    ///
+    /// # Returns
+    /// A new `Grid2D<T>` with the specified points set to the given value.
     pub fn from_sparse_points(
         width: i32,
         height: i32,
@@ -123,6 +139,15 @@ impl<T> Grid2D<T> {
         }
     }
 
+    /// Sets the value at the specified grid position.
+    ///
+    /// # Arguments
+    /// * `pt` - The position to set the value at
+    /// * `value` - The new value to set
+    ///
+    /// # Returns
+    /// `true` if the position is within the grid bounds and the value was set,
+    /// `false` if the position is outside the grid.
     pub fn set(&mut self, pt: Point, value: T) -> bool {
         match self.get_mut(pt) {
             Some(val) => {
@@ -283,6 +308,10 @@ impl<
     }
 }
 
+/// An iterator over the coordinates of a 2D grid.
+///
+/// This iterator yields each point in the grid in row-major order (left to right, then top to bottom).
+/// It starts at (0,0) and continues until it reaches the grid's maximum bounds.
 pub struct GridCoordIterator {
     current: Point,
     max: Point,
@@ -304,6 +333,10 @@ impl Iterator for GridCoordIterator {
     }
 }
 
+/// An iterator over the values in a 2D grid.
+///
+/// This iterator yields each value in the grid in row-major order,
+/// following the same traversal pattern as `GridCoordIterator`.
 pub struct GridIterator<'a, T> {
     grid: &'a Grid2D<T>,
     ci: GridCoordIterator,
@@ -316,6 +349,12 @@ impl<'a, T: Copy> Iterator for GridIterator<'a, T> {
     }
 }
 
+/// An iterator that yields each grid cell along with its 8 surrounding neighbors.
+///
+/// This iterator traverses the grid in the same order as `GridCoordIterator` and `GridIterator`,
+/// but for each position it returns the cell's value and an array of optional values for the
+/// 8 surrounding cells (the Moore neighborhood). Missing neighbors (e.g., at grid edges)
+/// are represented by `None`.
 pub struct GridNeighborhoodIterator<'a, T> {
     grid: &'a Grid2D<T>,
     ci: GridCoordIterator,

@@ -3,7 +3,12 @@ use std::fmt::Display;
 #[cfg(feature = "serde")]
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
-/// An ASCII character that can be serialized as a string.
+/// A wrapper for ASCII characters with efficient serialization.
+///
+/// `AsciiGlyph` provides a type-safe way to work with ASCII characters while ensuring
+/// memory efficiency by using a single byte for storage. It supports conversion to and from
+/// `u8` and `char` types, as well as serialization/deserialization when the "serde" feature
+/// is enabled.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(transparent)]
 pub struct AsciiGlyph(u8);

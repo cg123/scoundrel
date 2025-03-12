@@ -1,11 +1,19 @@
 use std::cmp::Ordering;
 
+/// A priority queue entry with a value and priority, designed for use in min-heaps.
+///
+/// This struct is used to store items with associated priorities in a binary heap
+/// (like Rust's `BinaryHeap`), but with the ordering reversed to create a min-heap
+/// where the lowest priority values are extracted first.
+///
+/// It's particularly useful for implementing algorithms like A* pathfinding, Dijkstra's
+/// algorithm, and other priority-based search algorithms.
 #[derive(Debug, Clone)]
-/// A priority queue entry with a value and a priority.
-/// A struct representing an entry in a min-heap with a value and a priority.
-/// The priority determines the order of the entries in the heap.
 pub struct MinHeapEntry<T, P> {
+    /// The value stored in this entry.
     pub value: T,
+
+    /// The priority of this entry (lower values are extracted first from the heap).
     pub priority: P,
 }
 
