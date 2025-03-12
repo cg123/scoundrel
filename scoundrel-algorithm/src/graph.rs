@@ -13,7 +13,7 @@ pub trait BaseGraph {
     fn adjacent_nodes(&self, point: Self::NodeHandle) -> Vec<Self::NodeHandle>;
 }
 
-/// A `LabeledGraph` is a `BaseGraph` that also associates a label of type `Label` with each node.=
+/// A `LabeledGraph` is a `BaseGraph` that also associates a label of type `Label` with each node.
 pub trait LabeledGraph<Label: Copy>: BaseGraph {
     /// Returns the label associated with the given node, if it has one.
     fn get(&self, point: Self::NodeHandle) -> Option<Label>;
