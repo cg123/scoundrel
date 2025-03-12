@@ -12,5 +12,5 @@ tui = { package = "ratatui", version = "0.29", optional = true, default-features
 crossterm = { version = "0.28.1", optional = true }
 
 [features]
-serde = ["scoundrel-geometry/serde", "scoundrel-util/serde"]
+serde = ["scoundrel-geometry/serde", "scoundrel-util/serde", "scoundrel-util/serde_json"]
 terminal = ["scoundrel-geometry/tui", "tui", "crossterm"]

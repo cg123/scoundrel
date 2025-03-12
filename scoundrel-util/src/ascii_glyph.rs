@@ -154,7 +154,7 @@ mod tests {
     }
 
     // Test serde if the feature is enabled
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_json")]
     mod serde_tests {
         use super::*;
         use serde_json;
