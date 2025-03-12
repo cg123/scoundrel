@@ -64,6 +64,26 @@ impl HasSqrt for f64 {
     }
 }
 
+/// A trait for types that have an absolute value function.
+pub trait HasAbs {
+    fn _abs(&self) -> Self;
+}
+impl HasAbs for i32 {
+    fn _abs(&self) -> Self {
+        self.abs()
+    }
+}
+impl HasAbs for i64 {
+    fn _abs(&self) -> Self {
+        self.abs()
+    }
+}
+impl HasAbs for f32 {
+    fn _abs(&self) -> Self {
+        self.abs()
+    }
+}
+
 /// A `NonNaN32` is a 32 bit floating point value, guaranteed to not be NaN.
 ///
 /// Useful for ordering.

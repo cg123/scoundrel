@@ -8,6 +8,7 @@ pub mod bsp;
 mod grid2d;
 mod half_space;
 mod matrix;
+pub mod metric;
 mod neighborhood;
 pub mod quadtree;
 pub mod tilebin;
