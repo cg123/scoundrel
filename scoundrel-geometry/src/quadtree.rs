@@ -288,4 +288,148 @@ mod tests {
             panic!("expected quadtree with children");
         }
     }
+
+    #[test]
+    fn test_empty_quadtree() {
+        // Test building an empty quadtree
+        let items: Vec<(i32, Point)> = vec![];
+        let bounds = Rect::with_points(Point::new(0, 0), Point::new(10, 10));
+        let tree = build_quadtree(items, bounds, 3);
+
+        // Check it's a leaf node with no contents
+        if let NodePayload::Contents(contents) = &tree.payload {
+            assert!(contents.is_empty());
+        } else {
+            panic!("Expected empty quadtree to be a leaf node");
+        }
+
+        // Test queries on empty tree
+        let mut results = Vec::new();
+        tree.query_rect(
+            Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
+            &mut |&(id, _)| {
+                results.push(id);
+            },
+        );
+        assert!(results.is_empty());
+
+        // Test nearest on empty tree
+        let nearest = tree.nearest(Point::new(5, 5), None);
+        assert!(nearest.is_none());
+    }
+
+    #[test]
+    fn test_build_quadtree_max_depth_zero() {
+        // With max_depth = 0, should create a leaf node regardless of number of items
+        let items = vec![
+            (1, Point::new(1, 1)),
+            (2, Point::new(5, 5)),
+            (3, Point::new(8, 8)),
+        ];
+        let bounds = Rect::with_points(Point::new(0, 0), Point::new(10, 10));
+        let tree = build_quadtree(items.clone(), bounds, 0);
+
+        // Check it's a leaf node containing all items
+        if let NodePayload::Contents(contents) = &tree.payload {
+            assert_eq!(contents.len(), 3);
+            assert!(contents.contains(&(1, Point::new(1, 1))));
+            assert!(contents.contains(&(2, Point::new(5, 5))));
+            assert!(contents.contains(&(3, Point::new(8, 8))));
+        } else {
+            panic!("Expected tree with max_depth=0 to be a leaf node");
+        }
+    }
+
+    #[test]
+    fn test_all_points_in_same_quadrant() {
+        // All points in bottom-left quadrant
+        let items = vec![
+            (1, Point::new(1, 1)),
+            (2, Point::new(2, 2)),
+            (3, Point::new(3, 3)),
+        ];
+        let bounds = Rect::with_points(Point::new(0, 0), Point::new(10, 10));
+        let tree = build_quadtree(items, bounds, 1);
+
+        // Should have children, but only one populated
+        if let NodePayload::Children(children) = &tree.payload {
+            // Check bottom-left quadrant (index 2)
+            if let NodePayload::Contents(contents) = &children[2].payload {
+                assert_eq!(contents.len(), 3);
+            } else {
+                panic!("Expected bottom-left child to be a leaf node");
+            }
+
+            // Check other quadrants are empty
+            for i in [0, 1, 3] {
+                if let NodePayload::Contents(contents) = &children[i].payload {
+                    assert!(contents.is_empty());
+                } else {
+                    panic!("Expected empty quadrant to be a leaf node");
+                }
+            }
+        } else {
+            panic!("Expected tree to have children");
+        }
+    }
+
+    #[test]
+    fn test_nearest_with_priority() {
+        // Test nearest when a best candidate is already provided
+        let node = Node {
+            bounds: Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
+            payload: NodePayload::Contents(vec![(1, Point::new(5, 4)), (2, Point::new(7, 7))]),
+        };
+
+        // Query point is at (6,6)
+        let query = Point::new(6, 6);
+
+        // Without existing best candidate, (7,7) should be closest
+        let nearest = node.nearest(query, None).unwrap();
+        assert_eq!(nearest.1, &(2, Point::new(7, 7)));
+
+        // With existing best candidate very close to query point, should keep that one
+        let best_candidate = (0, &(0, Point::new(6, 6))); // Distance = 0
+        let nearest_with_best = node.nearest(query, Some(best_candidate)).unwrap();
+        assert_eq!(nearest_with_best.1, &(0, Point::new(6, 6)));
+    }
+
+    #[test]
+    fn test_nearest_point_outside_bounds() {
+        // Test with query point outside the bounds
+        let node = Node {
+            bounds: Rect::with_points(Point::new(0, 0), Point::new(10, 10)),
+            payload: NodePayload::Contents(vec![(1, Point::new(1, 1)), (2, Point::new(9, 9))]),
+        };
+
+        // Query point outside bounds
+        let query = Point::new(15, 15);
+
+        // Should still find (9,9) as closest
+        let nearest = node.nearest(query, None).unwrap();
+        assert_eq!(nearest.1, &(2, Point::new(9, 9)));
+    }
+
+    #[test]
+    fn test_nested_nearest() {
+        // More complex tree with multiple levels for nearest search
+        let tree = build_quadtree(
+            vec![
+                (0, Point::new(25, 25)),
+                (1, Point::new(75, 75)),
+                (2, Point::new(10, 90)),
+                (3, Point::new(25, 75)),
+                (4, Point::new(60, 40)),
+                (5, Point::new(60, 10)),
+            ],
+            Rect::with_points(Point::new(0, 0), Point::new(100, 100)),
+            2,
+        );
+
+        // Test queries in different areas
+        // Query in center
+        assert_eq!(tree.nearest(Point::new(50, 50), None).unwrap().1 .0, 4); // (60,40) is closest
+        assert_eq!(tree.nearest(Point::new(90, 90), None).unwrap().1 .0, 1); // (75,75) is closest
+        assert_eq!(tree.nearest(Point::new(100, 10), None).unwrap().1 .0, 5); // (60,10) is closest
+    }
 }

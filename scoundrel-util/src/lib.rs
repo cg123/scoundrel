@@ -1,10 +1,10 @@
 mod ascii_glyph;
+mod min_heap_entry;
 pub mod numeric;
-mod pq_entry;
 
 pub use ascii_glyph::AsciiGlyph;
+pub use min_heap_entry::MinHeapEntry;
 pub use numeric::NonNaN32;
-pub use pq_entry::PQEntry;
 
 #[macro_export]
 macro_rules! ignore_ident {

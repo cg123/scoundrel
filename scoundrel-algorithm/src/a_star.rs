@@ -1,5 +1,5 @@
 use crate::graph::LabeledSpatialGraph;
-use scoundrel_util::PQEntry;
+use scoundrel_util::MinHeapEntry;
 use std::collections::{BinaryHeap, HashMap};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -27,12 +27,12 @@ pub fn a_star<M: LabeledSpatialGraph<Passability>>(
     let mut frontier = BinaryHeap::new();
 
     running_cost.insert(start, M::Distance::default());
-    frontier.push(PQEntry {
+    frontier.push(MinHeapEntry {
         value: start,
         priority: Default::default(),
     });
 
-    while let Some(PQEntry { value: current, .. }) = frontier.pop() {
+    while let Some(MinHeapEntry { value: current, .. }) = frontier.pop() {
         if current == end {
             break;
         }
@@ -46,7 +46,7 @@ pub fn a_star<M: LabeledSpatialGraph<Passability>>(
                 {
                     running_cost.insert(candidate, new_cost);
                     came_from.insert(candidate, current);
-                    frontier.push(PQEntry {
+                    frontier.push(MinHeapEntry {
                         value: candidate,
                         priority: new_cost + map.distance(candidate, end),
                     });
