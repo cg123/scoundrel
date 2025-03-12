@@ -18,7 +18,11 @@ impl OrthoLine {
 
     /// Checks if the given point is contained in the line.
     pub fn contains(&self, point: Point) -> bool {
-        let t = (point - self.start)[self.axis];
+        let offset = point - self.start;
+        if offset[self.axis.opposite()] != 0 {
+            return false;
+        }
+        let t = offset[self.axis];
         t >= 0 && t < self.length
     }
 
@@ -134,6 +138,14 @@ mod tests {
             length: 4,
         };
         assert_eq!(line.end(), Point::new(4, 1));
+
+        // Test Y axis
+        let line = OrthoLine {
+            axis: Axis2D::Y,
+            start: Point::new(5, 5),
+            length: 3,
+        };
+        assert_eq!(line.end(), Point::new(5, 7));
     }
 
     #[test]
@@ -147,10 +159,65 @@ mod tests {
         assert!(line.contains(Point::new(1, 2)));
         assert!(line.contains(Point::new(1, 3)));
         assert!(!line.contains(Point::new(1, 4)));
+
+        // Test out of bounds point on other axis
+        assert!(!line.contains(Point::new(2, 2)));
+
+        // Test zero length line
+        let zero_line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(10, 10),
+            length: 0,
+        };
+        assert!(!zero_line.contains(Point::new(10, 10)));
+    }
+
+    #[test]
+    fn ortholine_for_each() {
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(1, 5),
+            length: 3,
+        };
+
+        let mut visited = Vec::new();
+        line.for_each(|pt| visited.push(pt));
+
+        assert_eq!(visited.len(), 3);
+        assert_eq!(visited[0], Point::new(1, 5));
+        assert_eq!(visited[1], Point::new(2, 5));
+        assert_eq!(visited[2], Point::new(3, 5));
+
+        // Test Y axis
+        let line = OrthoLine {
+            axis: Axis2D::Y,
+            start: Point::new(5, 1),
+            length: 2,
+        };
+
+        let mut visited = Vec::new();
+        line.for_each(|pt| visited.push(pt));
+
+        assert_eq!(visited.len(), 2);
+        assert_eq!(visited[0], Point::new(5, 1));
+        assert_eq!(visited[1], Point::new(5, 2));
+
+        // Test zero length line (should do nothing)
+        let zero_line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(0, 0),
+            length: 0,
+        };
+
+        let mut visited = Vec::new();
+        zero_line.for_each(|pt| visited.push(pt));
+
+        assert_eq!(visited.len(), 0);
     }
 
     #[test]
     fn halfspace_contains() {
+        // Test positive X half-space
         let halfspace = AxialHalfSpace {
             axis: Axis2D::X,
             offset: 2,
@@ -159,6 +226,26 @@ mod tests {
         assert!(!halfspace.contains(Point::new(1, 0)));
         assert!(halfspace.contains(Point::new(2, 0)));
         assert!(halfspace.contains(Point::new(3, 0)));
+
+        // Test negative X half-space
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 2,
+            positive: false,
+        };
+        assert!(halfspace.contains(Point::new(1, 0)));
+        assert!(!halfspace.contains(Point::new(2, 0)));
+        assert!(!halfspace.contains(Point::new(3, 0)));
+
+        // Test Y axis
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::Y,
+            offset: 5,
+            positive: true,
+        };
+        assert!(!halfspace.contains(Point::new(10, 4)));
+        assert!(halfspace.contains(Point::new(10, 5)));
+        assert!(halfspace.contains(Point::new(10, 6)));
     }
 
     #[test]
@@ -172,10 +259,17 @@ mod tests {
         assert_eq!(opposite.axis, Axis2D::Y);
         assert_eq!(opposite.offset, 1);
         assert_eq!(opposite.positive, true);
+
+        // Check that opposite of opposite is original
+        let original = opposite.opposite();
+        assert_eq!(original.axis, Axis2D::Y);
+        assert_eq!(original.offset, 1);
+        assert_eq!(original.positive, false);
     }
 
     #[test]
     fn halfspace_intersects_rect() {
+        // Test positive half-space with intersection
         let halfspace = AxialHalfSpace {
             axis: Axis2D::X,
             offset: 2,
@@ -183,10 +277,38 @@ mod tests {
         };
         let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
         assert!(halfspace.intersects_rect(rect));
+
+        // Test positive half-space with no intersection
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 5,
+            positive: true,
+        };
+        let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
+        assert!(!halfspace.intersects_rect(rect));
+
+        // Test negative half-space with intersection
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::Y,
+            offset: 3,
+            positive: false,
+        };
+        let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
+        assert!(halfspace.intersects_rect(rect));
+
+        // Test negative half-space with no intersection
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::Y,
+            offset: 0,
+            positive: false,
+        };
+        let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
+        assert!(!halfspace.intersects_rect(rect));
     }
 
     #[test]
     fn halfspace_clip_rect() {
+        // Test positive X half-space
         let halfspace = AxialHalfSpace {
             axis: Axis2D::X,
             offset: 2,
@@ -196,10 +318,42 @@ mod tests {
         let clipped = halfspace.clip_rect(rect).unwrap();
         assert_eq!(clipped.min, Point::new(2, 0));
         assert_eq!(clipped.max, Point::new(4, 4));
+
+        // Test negative X half-space
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 3,
+            positive: false,
+        };
+        let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
+        let clipped = halfspace.clip_rect(rect).unwrap();
+        assert_eq!(clipped.min, Point::new(0, 0));
+        assert_eq!(clipped.max, Point::new(3, 4));
+
+        // Test Y axis
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::Y,
+            offset: 2,
+            positive: true,
+        };
+        let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
+        let clipped = halfspace.clip_rect(rect).unwrap();
+        assert_eq!(clipped.min, Point::new(0, 2));
+        assert_eq!(clipped.max, Point::new(4, 4));
+
+        // Test no intersection
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 10,
+            positive: true,
+        };
+        let rect = Rect::with_points(Point::new(0, 0), Point::new(4, 4));
+        assert!(halfspace.clip_rect(rect).is_none());
     }
 
     #[test]
-    fn halfspace_clip_line() {
+    fn halfspace_clip_line_different_axis() {
+        // Test positive half-space with line on different axis (outside)
         let halfspace = AxialHalfSpace {
             axis: Axis2D::X,
             offset: 2,
@@ -212,5 +366,151 @@ mod tests {
         };
         let clipped = halfspace.clip_line(line);
         assert!(clipped.is_none());
+
+        // Test positive half-space with line on different axis (inside)
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 2,
+            positive: true,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::Y,
+            start: Point::new(3, 1),
+            length: 3,
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.axis, Axis2D::Y);
+        assert_eq!(clipped.start, Point::new(3, 1));
+        assert_eq!(clipped.length, 3);
+
+        // Test negative half-space
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::Y,
+            offset: 5,
+            positive: false,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(1, 3),
+            length: 5,
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.axis, Axis2D::X);
+        assert_eq!(clipped.start, Point::new(1, 3));
+        assert_eq!(clipped.length, 5);
+    }
+
+    #[test]
+    fn halfspace_clip_line_same_axis() {
+        // Test positive half-space, line partially inside
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 3,
+            positive: true,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(1, 5),
+            length: 5, // Line goes from x=1 to x=5
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.axis, Axis2D::X);
+        assert_eq!(clipped.start, Point::new(3, 5)); // Start moved to offset
+        assert_eq!(clipped.length, 3); // 3 points: 3, 4, 5
+
+        // Test negative half-space, line partially inside
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 4,
+            positive: false,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(1, 5),
+            length: 5, // Line goes from x=1 to x=5
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.axis, Axis2D::X);
+        assert_eq!(clipped.start, Point::new(1, 5)); // Start unchanged
+        assert_eq!(clipped.length, 3); // 3 points: 1, 2, 3
+
+        // Test line completely outside half-space
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 10,
+            positive: true,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(1, 5),
+            length: 5,
+        };
+        let clipped = halfspace.clip_line(line);
+        assert!(clipped.is_none());
+
+        // Test line completely inside half-space
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 1,
+            positive: true,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(5, 5),
+            length: 3,
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.axis, Axis2D::X);
+        assert_eq!(clipped.start, Point::new(5, 5)); // Unchanged
+        assert_eq!(clipped.length, 3); // Unchanged
+    }
+
+    #[test]
+    fn halfspace_clip_line_edge_cases() {
+        // Test line that ends exactly at the half-space boundary (positive)
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 5,
+            positive: true,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(5, 10),
+            length: 5, // Line goes from x=5 to x=9
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.start, Point::new(5, 10));
+        assert_eq!(clipped.length, 5);
+
+        // Test line that starts exactly at the half-space boundary (negative)
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::X,
+            offset: 5,
+            positive: false,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::X,
+            start: Point::new(0, 10),
+            length: 5, // Line goes from x=0 to x=4
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.start, Point::new(0, 10));
+        assert_eq!(clipped.length, 5);
+
+        // Test Y axis clipping
+        let halfspace = AxialHalfSpace {
+            axis: Axis2D::Y,
+            offset: 3,
+            positive: true,
+        };
+        let line = OrthoLine {
+            axis: Axis2D::Y,
+            start: Point::new(0, 2),
+            length: 4, // Line goes from y=2 to y=5
+        };
+        let clipped = halfspace.clip_line(line).unwrap();
+        assert_eq!(clipped.axis, Axis2D::Y);
+        assert_eq!(clipped.start, Point::new(0, 3)); // Start moved to offset
+        assert_eq!(clipped.length, 3); // 3 points: 3, 4, 5
     }
 }

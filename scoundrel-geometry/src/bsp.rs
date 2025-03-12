@@ -264,4 +264,223 @@ mod tests {
         let root_node = tree.root.borrow();
         assert!(root_node.children.is_none());
     }
+
+    #[test]
+    fn test_node_new_and_accessors() {
+        let bounds = Rect::with_points(Point::new(0, 0), Point::new(10, 10));
+        let node = Node::new(bounds, 42u32);
+
+        // Check initial state
+        assert_eq!(node.bounds, bounds);
+        assert_eq!(node.contents, 42);
+        assert!(node.parent.is_none());
+        assert!(node.children.is_none());
+        assert!(node.edges.is_empty());
+    }
+
+    #[test]
+    fn test_node_with_parent() {
+        let parent_bounds = Rect::with_points(Point::new(0, 0), Point::new(20, 20));
+        let parent = Rc::new(RefCell::new(Node::new(parent_bounds, 1u32)));
+        let parent_weak = Rc::downgrade(&parent);
+
+        let bounds = Rect::with_points(Point::new(5, 5), Point::new(15, 15));
+        let node = Node::new(bounds, 2u32).with_parent(parent_weak.clone());
+
+        // Check parent reference is set
+        assert!(node.parent.is_some());
+        assert!(Rc::ptr_eq(
+            &node.parent.as_ref().unwrap().upgrade().unwrap(),
+            &parent
+        ));
+    }
+
+    #[test]
+    fn test_node_with_edges() {
+        let bounds = Rect::with_points(Point::new(0, 0), Point::new(10, 10));
+        let neighbor_bounds = Rect::with_points(Point::new(10, 0), Point::new(20, 10));
+        let neighbor = Rc::new(RefCell::new(Node::new(neighbor_bounds, 2u32)));
+
+        // Create an edge between nodes
+        let edge = HalfEdge {
+            line: OrthoLine {
+                axis: Axis2D::Y,
+                start: Point::new(10, 0),
+                length: 10,
+            },
+            neighbor: Rc::downgrade(&neighbor),
+        };
+
+        // Create node with the edge
+        let node = Node::new(bounds, 1u32).with_edges(vec![edge]);
+
+        // Check edge is set correctly
+        assert_eq!(node.edges.len(), 1);
+        assert_eq!(node.edges[0].line.axis, Axis2D::Y);
+        assert_eq!(node.edges[0].line.start, Point::new(10, 0));
+        assert_eq!(node.edges[0].line.length, 10);
+        assert!(Rc::ptr_eq(
+            &node.edges[0].neighbor.upgrade().unwrap(),
+            &neighbor
+        ));
+    }
+
+    #[test]
+    fn test_half_edge_split() {
+        let neighbor_bounds = Rect::with_points(Point::new(10, 0), Point::new(20, 10));
+        let neighbor = Rc::new(RefCell::new(Node::new(neighbor_bounds, 2u32)));
+
+        // Create a horizontal edge
+        let edge = HalfEdge {
+            line: OrthoLine {
+                axis: Axis2D::X,
+                start: Point::new(0, 5),
+                length: 10, // spans x=0 to x=9
+            },
+            neighbor: Rc::downgrade(&neighbor),
+        };
+
+        // Test splitting edge with a vertical half-space at x=3 (positive side)
+        let half_space = HalfSpace {
+            axis: Axis2D::X,
+            offset: 3,
+            positive: true,
+        };
+
+        let split_edge = edge.split(half_space).unwrap();
+
+        // Check split edge properties
+        assert_eq!(split_edge.line.axis, Axis2D::X);
+        assert_eq!(split_edge.line.start, Point::new(3, 5)); // Start moved to x=3
+        assert_eq!(split_edge.line.length, 7); // Length reduced to 7 (x=3 to x=9)
+        assert!(Rc::ptr_eq(
+            &split_edge.neighbor.upgrade().unwrap(),
+            &neighbor
+        ));
+
+        // Test splitting with a half-space that doesn't intersect the edge
+        let non_intersecting_hs = HalfSpace {
+            axis: Axis2D::X,
+            offset: 20,
+            positive: true,
+        };
+
+        let split_result = edge.split(non_intersecting_hs);
+        assert!(split_result.is_none());
+    }
+
+    #[test]
+    fn test_tree_split_y_axis() {
+        // Test splitting on Y axis
+        let mut tree = create_test_tree();
+        let half_space = HalfSpace {
+            axis: Axis2D::Y,
+            offset: 5,
+            positive: true,
+        };
+
+        let root_clone = tree.root.clone();
+        let split_result = tree.split(root_clone, half_space, |_, _| 3);
+
+        assert!(split_result);
+        let root_node = tree.root.borrow();
+        let children = root_node.children.as_ref().unwrap();
+        let (above, below) = (&children[0], &children[1]);
+
+        // Check bounds are split correctly on Y axis
+        assert_eq!(
+            above.borrow().bounds,
+            Rect::with_points(Point::new(0, 5), Point::new(10, 10))
+        );
+        assert_eq!(
+            below.borrow().bounds,
+            Rect::with_points(Point::new(0, 0), Point::new(10, 5))
+        );
+
+        // Check contents are updated correctly
+        assert_eq!(above.borrow().contents, 3);
+        assert_eq!(below.borrow().contents, 3);
+    }
+
+    #[test]
+    fn test_nested_tree_splits() {
+        // Create a tree and perform multiple splits
+        let mut tree = create_test_tree();
+
+        // First split on X axis
+        let half_space_x = HalfSpace {
+            axis: Axis2D::X,
+            offset: 5,
+            positive: true,
+        };
+
+        let root_clone = tree.root.clone();
+        tree.split(root_clone, half_space_x, |_, _| 2);
+
+        // Get the right child (above)
+        let right_child = tree.root.borrow().children.as_ref().unwrap()[0].clone();
+
+        // Split the right child on Y axis
+        let half_space_y = HalfSpace {
+            axis: Axis2D::Y,
+            offset: 5,
+            positive: true,
+        };
+
+        let split_result = tree.split(right_child.clone(), half_space_y, |_, _| 3);
+        assert!(split_result);
+
+        // Check that the right child now has children
+        let right_node = right_child.borrow();
+        assert!(right_node.children.is_some());
+
+        // Get the upper and lower parts of the right child
+        let right_children = right_node.children.as_ref().unwrap();
+        let (upper_right, lower_right) = (&right_children[0], &right_children[1]);
+
+        // Verify their bounds
+        assert_eq!(
+            upper_right.borrow().bounds,
+            Rect::with_points(Point::new(5, 5), Point::new(10, 10))
+        );
+        assert_eq!(
+            lower_right.borrow().bounds,
+            Rect::with_points(Point::new(5, 0), Point::new(10, 5))
+        );
+
+        // Check content values propagated correctly
+        assert_eq!(upper_right.borrow().contents, 3);
+        assert_eq!(lower_right.borrow().contents, 3);
+    }
+
+    #[test]
+    fn test_content_function() {
+        // Test a more complex content generation function
+        let mut tree = create_test_tree();
+
+        // Split function that uses both parent content and new bounds
+        let half_space = HalfSpace {
+            axis: Axis2D::X,
+            offset: 5,
+            positive: true,
+        };
+
+        let root_clone = tree.root.clone();
+        let split_result = tree.split(root_clone, half_space, |parent_content, bounds| {
+            // Generate content based on parent content and area of new bounds
+            let area = (bounds.max.x - bounds.min.x) * (bounds.max.y - bounds.min.y);
+            parent_content + (area as u32)
+        });
+
+        assert!(split_result);
+        let root_node = tree.root.borrow();
+        let children = root_node.children.as_ref().unwrap();
+        let (above, below) = (&children[0], &children[1]);
+
+        // Right side: 1 (parent) + 5*10 (area) = 51
+        assert_eq!(above.borrow().contents, 51);
+
+        // Left side: 1 (parent) + 5*10 (area) = 51
+        assert_eq!(below.borrow().contents, 51);
+    }
 }
