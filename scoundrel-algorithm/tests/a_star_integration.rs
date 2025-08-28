@@ -1,4 +1,4 @@
-use scoundrel_algorithm::{a_star, Passability};
+use scoundrel_algorithm::{Passability, a_star};
 use scoundrel_geometry::{Grid2D, Point, Vector2};
 
 fn _make_path_grid(

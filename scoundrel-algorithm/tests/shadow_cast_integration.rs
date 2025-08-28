@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use scoundrel_algorithm::{cast_light_2d, Opacity};
+use scoundrel_algorithm::{Opacity, cast_light_2d};
 use scoundrel_geometry::{Grid2D, Point};
 
 fn _compute_fov(map: &Grid2D<Opacity>, origin: Point, radius: i32) -> HashSet<Point> {
@@ -267,9 +267,11 @@ fn test_fov_symmetric_property() {
             let a_sees_b = can_see_from.get(&point_a).unwrap().contains(&point_b);
             let b_sees_a = can_see_from.get(&point_b).unwrap().contains(&point_a);
 
-            assert_eq!(a_sees_b, b_sees_a,
-                      "FOV symmetry broken: visibility from {:?} to {:?} is {}, but visibility from {:?} to {:?} is {}", 
-                      point_a, point_b, a_sees_b, point_b, point_a, b_sees_a);
+            assert_eq!(
+                a_sees_b, b_sees_a,
+                "FOV symmetry broken: visibility from {:?} to {:?} is {}, but visibility from {:?} to {:?} is {}",
+                point_a, point_b, a_sees_b, point_b, point_a, b_sees_a
+            );
         }
     }
 }

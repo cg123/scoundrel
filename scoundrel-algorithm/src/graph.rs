@@ -66,7 +66,10 @@ impl<'a, Graph: LabeledGraph<T>, T: Copy, Tp: Copy, F: Fn(T) -> Tp> LabeledGraph
 /// a given functor to each node or edge label as it is accessed. The functor must be a function that
 /// takes a label of the original type and returns a label of the new type.
 pub trait TransformableGraph<T> {
-    fn apply<Tp, F: Fn(T) -> Tp>(&self, functor: F) -> GraphFunctorView<Self, T, Tp, F>;
+    fn apply<Tp, F: Fn(T) -> Tp>(
+        &self,
+        functor: F,
+    ) -> GraphFunctorView<'_, Self, T, Tp, F>;
 }
 
 impl<T: Copy, Graph: LabeledGraph<T>> TransformableGraph<T> for Graph {
@@ -75,7 +78,10 @@ impl<T: Copy, Graph: LabeledGraph<T>> TransformableGraph<T> for Graph {
     /// # Arguments
     ///
     /// * `functor`: A function that takes a label of the original type and returns a label of the new type.
-    fn apply<Tp, F: Fn(T) -> Tp>(&self, functor: F) -> GraphFunctorView<Self, T, Tp, F> {
+    fn apply<Tp, F: Fn(T) -> Tp>(
+        &self,
+        functor: F,
+    ) -> GraphFunctorView<'_, Self, T, Tp, F> {
         GraphFunctorView {
             graph: self,
             functor,

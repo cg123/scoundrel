@@ -16,9 +16,9 @@ pub trait VectorMetric<T, VectorT: IntoIterator<Item = T>> {
 pub struct Euclidean;
 
 impl<
-        T: Copy + HasZero + Ring + Sub<Output = T> + HasSqrt,
-        VectorT: IntoIterator<Item = T>,
-    > VectorMetric<T, VectorT> for Euclidean
+    T: Copy + HasZero + Ring + Sub<Output = T> + HasSqrt,
+    VectorT: IntoIterator<Item = T>,
+> VectorMetric<T, VectorT> for Euclidean
 {
     fn distance(&self, lhs: VectorT, rhs: VectorT) -> T {
         self.distance_fast_monotonic(lhs, rhs)._sqrt()
@@ -34,10 +34,8 @@ impl<
 
 pub struct Manhattan;
 
-impl<
-        T: Copy + HasZero + Ring + Sub<Output = T> + HasAbs,
-        VectorT: IntoIterator<Item = T>,
-    > VectorMetric<T, VectorT> for Manhattan
+impl<T: Copy + HasZero + Ring + Sub<Output = T> + HasAbs, VectorT: IntoIterator<Item = T>>
+    VectorMetric<T, VectorT> for Manhattan
 {
     fn distance(&self, lhs: VectorT, rhs: VectorT) -> T {
         lhs.into_iter()
@@ -50,9 +48,9 @@ impl<
 pub struct Chebyshev;
 
 impl<
-        T: Copy + HasZero + Ring + Sub<Output = T> + HasAbs + Ord,
-        VectorT: IntoIterator<Item = T>,
-    > VectorMetric<T, VectorT> for Chebyshev
+    T: Copy + HasZero + Ring + Sub<Output = T> + HasAbs + Ord,
+    VectorT: IntoIterator<Item = T>,
+> VectorMetric<T, VectorT> for Chebyshev
 {
     fn distance(&self, lhs: VectorT, rhs: VectorT) -> T {
         lhs.into_iter()

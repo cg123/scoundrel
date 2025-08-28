@@ -536,8 +536,8 @@ mod tests {
 
         // Test queries in different areas
         // Query in center
-        assert_eq!(tree.nearest(Point::new(50, 50), None).unwrap().1 .0, 4); // (60,40) is closest
-        assert_eq!(tree.nearest(Point::new(90, 90), None).unwrap().1 .0, 1); // (75,75) is closest
-        assert_eq!(tree.nearest(Point::new(100, 10), None).unwrap().1 .0, 5); // (60,10) is closest
+        assert_eq!(tree.nearest(Point::new(50, 50), None).unwrap().1.0, 4); // (60,40) is closest
+        assert_eq!(tree.nearest(Point::new(90, 90), None).unwrap().1.0, 1); // (75,75) is closest
+        assert_eq!(tree.nearest(Point::new(100, 10), None).unwrap().1.0, 5); // (60,10) is closest
     }
 }

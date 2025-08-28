@@ -6,7 +6,7 @@ use crossterm::{
     event::{Event, KeyEvent, KeyEventKind},
     terminal::enable_raw_mode,
 };
-use tui::{backend::CrosstermBackend, Frame, Terminal};
+use tui::{Frame, Terminal, backend::CrosstermBackend};
 
 use crate::geometry::Point;
 

@@ -227,7 +227,7 @@ impl<T> Grid2D<T> {
     /// The iterator will visit each element in row-major order, i.e., it will visit all
     /// elements in the first row from left to right, then all elements in the second row
     /// from left to right, and so on.
-    pub fn iter(&self) -> GridIterator<T> {
+    pub fn iter(&self) -> GridIterator<'_, T> {
         GridIterator {
             grid: self,
             ci: self.iter_coords(),
@@ -239,7 +239,7 @@ impl<T> Grid2D<T> {
     /// The iterator will visit each coordinate in the grid and return a `(T, [Option<T>; 8])`
     /// representing the value at each location and at each `MooreNeighbor`. The index in
     /// the array corresponds to the `MooreNeighbor` enum value.
-    pub fn iter_neighborhoods(&self) -> GridNeighborhoodIterator<T> {
+    pub fn iter_neighborhoods(&self) -> GridNeighborhoodIterator<'_, T> {
         GridNeighborhoodIterator {
             grid: self,
             ci: self.iter_coords(),
@@ -248,9 +248,9 @@ impl<T> Grid2D<T> {
 }
 
 impl<
-        T: Copy + std::ops::Mul<f32, Output = Tp>,
-        Tp: std::ops::Mul<f32, Output = Tp> + std::ops::Add<Output = Tp>,
-    > Grid2D<T>
+    T: Copy + std::ops::Mul<f32, Output = Tp>,
+    Tp: std::ops::Mul<f32, Output = Tp> + std::ops::Add<Output = Tp>,
+> Grid2D<T>
 {
     /// Performs bilinear sampling on the 2D grid using the given floating point
     /// coordinates.
@@ -277,13 +277,9 @@ impl<
 }
 
 impl<
-        T: Copy
-            + HasSqrt
-            + std::ops::Sub<Output = T>
-            + std::ops::Div<Output = Tp>
-            + From<i8>,
-        Tp: Copy + From<i8>,
-    > Grid2D<T>
+    T: Copy + HasSqrt + std::ops::Sub<Output = T> + std::ops::Div<Output = Tp> + From<i8>,
+    Tp: Copy + From<i8>,
+> Grid2D<T>
 {
     /// Computes a central difference approximation of the gradient at the given 2D
     /// position.

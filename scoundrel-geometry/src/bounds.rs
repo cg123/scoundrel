@@ -146,12 +146,12 @@ impl<T: Copy + From<u16>> From<Size> for Vector2<T> {
 }
 
 impl<
-        T: Copy
-            + ops::Add<T, Output = T>
-            + ops::Sub<T, Output = T>
-            + ops::Div<T, Output = T>
-            + From<i32>,
-    > Bounds<T>
+    T: Copy
+        + ops::Add<T, Output = T>
+        + ops::Sub<T, Output = T>
+        + ops::Div<T, Output = T>
+        + From<i32>,
+> Bounds<T>
 {
     /// Returns a new `Bounds` instance with the specified center point and size.
     pub fn with_center(center: Vector2<T>, size: Vector2<T>) -> Bounds<T> {
@@ -188,13 +188,13 @@ impl<
 }
 
 impl<
-        T: Copy
-            + ops::Add<T, Output = T>
-            + ops::Sub<T, Output = T>
-            + ops::Div<T, Output = T>
-            + From<i32>
-            + PartialOrd<T>,
-    > Bounds<T>
+    T: Copy
+        + ops::Add<T, Output = T>
+        + ops::Sub<T, Output = T>
+        + ops::Div<T, Output = T>
+        + From<i32>
+        + PartialOrd<T>,
+> Bounds<T>
 {
     pub fn containing_quadrant_idx(&self, query: Vector2<T>) -> usize {
         let center = self.center();

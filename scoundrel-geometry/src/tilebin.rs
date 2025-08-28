@@ -175,10 +175,11 @@ mod tests {
 
         // Verify internal hashmap cleanup
         assert!(!bin.positions.contains_key(&1));
-        assert!(bin
-            .bins
-            .get(&Point::new(0, 0))
-            .map_or(true, |v| v.is_empty()));
+        assert!(
+            bin.bins
+                .get(&Point::new(0, 0))
+                .map_or(true, |v| v.is_empty())
+        );
     }
 
     #[test]

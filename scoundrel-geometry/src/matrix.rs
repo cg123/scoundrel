@@ -114,14 +114,14 @@ impl<T: Copy + Mul<Output = Tp>, Tp: Sub> Mat2<T> {
 }
 
 impl<
-        T: Copy
-            + Mul<Output = T>
-            + Sub<Output = T>
-            + Add<Output = T>
-            + Div<Output = T>
-            + HasZero
-            + PartialEq<T>,
-    > Mat2<T>
+    T: Copy
+        + Mul<Output = T>
+        + Sub<Output = T>
+        + Add<Output = T>
+        + Div<Output = T>
+        + HasZero
+        + PartialEq<T>,
+> Mat2<T>
 {
     /// Returns the inverse of this matrix, if one exists.
     ///

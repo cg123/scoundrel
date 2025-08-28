@@ -80,7 +80,9 @@ fn test_bresenham_approximate_symmetry() {
         assert!(
             differences <= 2,
             "Forward and backward lines should be similar, but {} points differ.\nForward: {:?}\nBackward: {:?}",
-            differences, forward, backward
+            differences,
+            forward,
+            backward
         );
 
         // Check that any differences are small

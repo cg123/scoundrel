@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 #[cfg(feature = "serde")]
-use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
 /// A wrapper for ASCII characters with efficient serialization.
 ///
